@@ -1,6 +1,6 @@
 {
-  "name": "Radar P/L",
-  "short_name": "Radar P/L",
+  "name": "Método Tempo",
+  "short_name": "Método Tempo",
   "description": "Ações da B3 com P/L até 7, com dados do Fundamentus.",
   "lang": "pt-BR",
   "start_url": "./",

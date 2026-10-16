@@ -1,4 +1,4 @@
-# Radar P/L
+# Método Tempo
 
 App de celular (PWA) que lista as ações da B3 com P/L até 7, com dados de
 [fundamentus.com.br](https://www.fundamentus.com.br/resultado.php).

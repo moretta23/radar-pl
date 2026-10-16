@@ -1,4 +1,4 @@
-"""Desenha o ícone do Radar P/L: barras de P/L com uma linha de corte;
+"""Desenha o ícone do Método Tempo: barras de P/L com uma linha de corte;
 as barras abaixo da linha (as baratas) ficam em verde-menta.
 
 Uso:  python scripts/gerar_icones.py

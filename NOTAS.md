@@ -1,6 +1,6 @@
-# Notas do projeto (para melhorias futuras)
+# Método Tempo: notas do projeto (para melhorias futuras)
 
-Criado em 15/10/2026. App no ar: https://moretta23.github.io/radar-pl/
+Criado em 15/10/2026 como "Radar P/L"; renomeado para "Método Tempo" em 16/10/2026. App no ar: https://moretta23.github.io/radar-pl/
 Repositório: https://github.com/moretta23/radar-pl
 
 ## Como funciona
@@ -34,8 +34,8 @@ Repositório: https://github.com/moretta23/radar-pl
   "Atualizar Radar P/L Fundamentus", hoje pausada).
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
-- Ao mudar arquivos do app, troque `CACHE = "radar-pl-v1"` no `sw.js` para
-  `v2`, `v3`… para os celulares pegarem a versão nova.
+- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v2"` no `sw.js`
+  (v3, v4…) para os celulares pegarem a versão nova.
 
 ## Ideias de melhoria
 
