@@ -17,7 +17,7 @@ Repositório: https://github.com/moretta23/radar-pl
 
 ## Decisões tomadas
 
-- Filtro principal: P/L ≤ 7 (ajustável de 1 a 15 no app).
+- Filtro principal: P/L ≤ 7 (ajustável de 1 a 30 no app).
 - Dív. líquida/patrimônio: barra de 0 a 5 (passo 0,1), padrão 0,5.
 - Por padrão mostra só P/L positivo (P/L negativo = empresa com prejuízo).
 - Liquidez padrão ≥ R$ 100 mil/dia, para tirar papéis sem negociação.
