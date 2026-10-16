@@ -45,9 +45,7 @@ header.top {
 .marca { display: flex; align-items: center; gap: 10px; }
 .marca img { width: 40px; height: 40px; border-radius: 10px; }
 .nomeapp { display: grid; gap: 2px; }
-.eyebrow { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
 h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.9rem; margin: 0; line-height: 1; }
-h1 span { color: var(--accent); }
 .contagem { font-family: var(--f-display); font-size: 1.05rem; color: var(--muted); white-space: nowrap; text-align: right; }
 .contagem b { color: var(--fg); font-size: 1.4rem; font-weight: 600; }
 .tesouro { display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -99,8 +97,7 @@ footer a { color: var(--accent); }
       <div class="marca">
         <img src="icons/icon-192.png" alt="">
         <div class="nomeapp">
-          <div class="eyebrow">Método Tempo</div>
-          <h1>P/L <span>≤ <span id="maxTxt">7</span></span></h1>
+          <h1>Método Tempo</h1>
         </div>
       </div>
       <div class="contagem"><b id="qtd">–</b> empresas</div>
@@ -206,7 +203,6 @@ function render() {
   const ord = $("ordem").value;
   const maxStr = fmt(max, max % 1 ? 1 : 0);
   $("maxOut").textContent = maxStr;
-  $("maxTxt").textContent = maxStr;
   const pvpMin = parseFloat($("pvpMin").value);
   const pvpMax = parseFloat($("pvpMax").value);
   const semMin = pvpMin <= 0, semMax = pvpMax >= PVP_TOPO;
