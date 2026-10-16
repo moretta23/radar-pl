@@ -56,7 +56,7 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 .chip { cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
 .chip input { accent-color: var(--accent); margin: 0; }
 .slider { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
-.slider label.rot { flex: none; width: 6.2em; }
+.slider label.rot { flex: none; width: 7.4em; }
 .slider input { flex: 1; accent-color: var(--accent); }
 .slider output { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; min-width: 4.2ch; text-align: right; font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -72,7 +72,7 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 .pl .k { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
 .regua { height: 4px; background: var(--track); border-radius: 2px; overflow: hidden; }
 .regua i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
-.metr { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 0; }
+.metr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; margin: 0; }
 .metr div { display: grid; gap: 1px; }
 .metr dt { font-size: .64rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .metr dd { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
@@ -81,7 +81,6 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 footer { margin-top: 20px; font-size: .78rem; color: var(--muted); line-height: 1.5; }
 footer a { color: var(--accent); }
 .grupo { display: inline-flex; align-items: center; gap: 6px; }
-@media (max-width: 340px) { .metr { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 </style>
 </head>
 <body>
@@ -119,6 +118,16 @@ footer a { color: var(--accent); }
         <input id="divMax" type="range" min="0" max="1" step="0.1" value="0.5">
         <output id="divMaxOut" for="divMax">0,5</output>
       </div>
+      <div class="slider">
+        <label class="rot" for="roeMin">ROE mín.</label>
+        <input id="roeMin" type="range" min="0" max="40" step="1" value="0">
+        <output id="roeMinOut" for="roeMin">livre</output>
+      </div>
+      <div class="slider">
+        <label class="rot" for="mrgMin">Margem mín.</label>
+        <input id="mrgMin" type="range" min="0" max="40" step="1" value="0">
+        <output id="mrgMinOut" for="mrgMin">livre</output>
+      </div>
     </div>
     <div class="linha">
       <span class="grupo"><label class="rot" for="ordem">Ordem</label>
@@ -126,6 +135,7 @@ footer a { color: var(--accent); }
         <option value="pl">Menor P/L</option>
         <option value="dy">Maior Div. Yield</option>
         <option value="roe">Maior ROE</option>
+        <option value="mrg_liq">Maior margem líquida</option>
         <option value="liq2m">Maior liquidez</option>
         <option value="pvp">Menor P/VP</option>
       </select></span>
@@ -165,7 +175,7 @@ function liqFmt(v) {
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "ordem", "liq", "pos"];
+const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "roeMin", "mrgMin", "ordem", "liq", "pos"];
 const PVP_TOPO = 5; // P/VP máx. no fim da barra = sem limite
 try {
   const s = JSON.parse(localStorage.getItem("radar-pl") || "{}");
@@ -188,6 +198,11 @@ function render() {
   $("pvpMaxOut").textContent = semMax ? "livre" : fmt(pvpMax, 1);
   const divMax = parseFloat($("divMax").value);
   $("divMaxOut").textContent = fmt(divMax, 1);
+  // ROE e margem em %; 0 = sem filtro.
+  const roeMin = parseFloat($("roeMin").value);
+  const mrgMin = parseFloat($("mrgMin").value);
+  $("roeMinOut").textContent = roeMin > 0 ? roeMin + "%" : "livre";
+  $("mrgMinOut").textContent = mrgMin > 0 ? mrgMin + "%" : "livre";
   try {
     const s = {};
     ctrl.forEach(k => { s[k] = k === "pos" ? $(k).checked : $(k).value; });
@@ -199,7 +214,9 @@ function render() {
   const pvpOk = a => (semMin && semMax) ||
     (a.pvp != null && a.pvp > 0 && (semMin || a.pvp >= pvpMin) && (semMax || a.pvp <= pvpMax));
   const r = acoes.filter(a => a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (a.liq2m || 0) >= liq &&
-    pvpOk(a) && a.div_pl != null && a.div_pl <= divMax + 1e-9 && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
+    pvpOk(a) && a.div_pl != null && a.div_pl <= divMax + 1e-9 &&
+    (roeMin <= 0 || (a.roe != null && a.roe >= roeMin)) &&
+    (mrgMin <= 0 || (a.mrg_liq != null && a.mrg_liq >= mrgMin)) && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
   const asc = ord === "pl" || ord === "pvp";
   r.sort((a, b) => {
     const x = a[ord], y = b[ord];
@@ -225,8 +242,9 @@ function render() {
         <div><dt>Div. Yield</dt><dd>${pct(a.dy)}</dd></div>
         <div><dt>P/VP</dt><dd>${fmt(a.pvp)}</dd></div>
         <div><dt>ROE</dt><dd class="${a.roe < 0 ? "neg" : ""}">${pct(a.roe)}</dd></div>
-        <div><dt>Liq. 2m</dt><dd>${liqFmt(a.liq2m)}</dd></div>
+        <div><dt>Mrg. líq.</dt><dd class="${a.mrg_liq < 0 ? "neg" : ""}">${pct(a.mrg_liq)}</dd></div>
         <div><dt>Dív/PL</dt><dd>${fmt(a.div_pl)}</dd></div>
+        <div><dt>Liq. 2m</dt><dd>${liqFmt(a.liq2m)}</dd></div>
       </dl>
     </li>`;
   }).join("");
