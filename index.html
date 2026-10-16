@@ -88,6 +88,8 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 footer { margin-top: 20px; font-size: .78rem; color: var(--muted); line-height: 1.5; }
 footer a { color: var(--accent); }
 .grupo { display: inline-flex; align-items: center; gap: 6px; }
+.grupo.setor { flex: 1; min-width: 0; }
+.grupo.setor select { flex: 1; min-width: 0; }
 </style>
 </head>
 <body>
@@ -143,6 +145,10 @@ footer a { color: var(--accent); }
       </div>
     </div>
     <div class="linha">
+      <span class="grupo setor"><label class="rot" for="setor">Setor</label>
+      <select id="setor"><option value="">Todos os setores</option></select></span>
+    </div>
+    <div class="linha">
       <span class="grupo"><label class="rot" for="ordem">Ordem</label>
       <select id="ordem">
         <option value="pl">Menor P/L</option>
@@ -188,10 +194,11 @@ function liqFmt(v) {
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "roeMin", "mrgMin", "ordem", "liq", "pos"];
+const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "roeMin", "mrgMin", "setor", "ordem", "liq", "pos"];
+let salvo = {};
 const PVP_TOPO = 5; // P/VP máx. no fim da barra = sem limite
 try {
-  const s = JSON.parse(localStorage.getItem("radar-pl") || "{}");
+  const s = salvo = JSON.parse(localStorage.getItem("radar-pl") || "{}");
   ctrl.forEach(k => { if (s[k] != null) { if (k === "pos") $(k).checked = s[k]; else $(k).value = s[k]; } });
 } catch (e) {}
 
@@ -225,7 +232,8 @@ function render() {
   // Com qualquer limite de P/VP ativo, fica de fora P/VP negativo (patrimônio negativo).
   const pvpOk = a => (semMin && semMax) ||
     (a.pvp != null && a.pvp > 0 && (semMin || a.pvp >= pvpMin) && (semMax || a.pvp <= pvpMax));
-  const r = acoes.filter(a => a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (a.liq2m || 0) >= liq &&
+  const setor = $("setor").value;
+  const r = acoes.filter(a => (!setor || a.s === setor) && a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (a.liq2m || 0) >= liq &&
     pvpOk(a) && a.div_pl != null && a.div_pl <= divMax + 1e-9 &&
     (roeMin <= 0 || (a.roe != null && a.roe >= roeMin)) &&
     (mrgMin <= 0 || (a.mrg_liq != null && a.mrg_liq >= mrgMin)) && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
@@ -246,6 +254,7 @@ function render() {
         <div class="id">
           <a class="ticker" href="https://www.fundamentus.com.br/detalhes.php?papel=${encodeURIComponent(a.t)}" target="_blank" rel="noopener">${esc(a.t)}</a>
           <div class="nome">${esc(a.n)}</div>
+          ${a.s ? `<div class="nome">${esc(a.s)}</div>` : ""}
         </div>
         <div class="pl"><div class="v">${fmt(a.pl)}</div><div class="k">P/L · R$ ${fmt(a.cotacao)}</div></div>
       </div>
@@ -268,6 +277,10 @@ async function carregar() {
     if (!resp.ok) throw new Error(resp.status);
     const dados = await resp.json();
     acoes = dados.acoes || [];
+    // Opções de setor vêm dos próprios dados; reaplica a escolha guardada.
+    const nomes = [...new Set(acoes.map(a => a.s).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    nomes.forEach(n => $("setor").add(new Option(n, n)));
+    if (salvo.setor && nomes.includes(salvo.setor)) $("setor").value = salvo.setor;
     $("data").textContent = dados.atualizado || "—";
     if (dados.tesouro) {
       $("tesPl").textContent = fmt(dados.tesouro.pl);
