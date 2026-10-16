@@ -61,6 +61,8 @@ h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.9rem; margin:
 .rot { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
 .chip { cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.linha.chips { flex-wrap: nowrap; gap: 6px; }
+.linha.chips .chip { white-space: nowrap; font-size: .8rem; padding: 6px 9px; }
 .chip input { accent-color: var(--accent); margin: 0; }
 .slider { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
 .slider label.rot { flex: none; width: 8.4em; white-space: nowrap; }
@@ -79,7 +81,7 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 .pl .k { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
 .regua { height: 4px; background: var(--track); border-radius: 2px; overflow: hidden; }
 .regua i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
-.metr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; margin: 0; }
+.metr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; margin: 0; }
 .metr div { display: grid; gap: 1px; }
 .metr dt { font-size: .64rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .metr dd { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
@@ -165,6 +167,8 @@ footer a { color: var(--accent); }
         <option value="1000000">≥ R$ 1 mi/dia</option>
         <option value="10000000">≥ R$ 10 mi/dia</option>
       </select></span>
+    </div>
+    <div class="linha chips">
       <label class="chip"><input id="pos" type="checkbox" checked> Só P/L positivo</label>
       <label class="chip"><input id="cresc" type="checkbox"> Receita crescendo (5 anos)</label>
     </div>
@@ -267,6 +271,7 @@ function render() {
         <div><dt>ROE</dt><dd class="${a.roe < 0 ? "neg" : ""}">${pct(a.roe)}</dd></div>
         <div><dt>Mrg. líq.</dt><dd class="${a.mrg_liq < 0 ? "neg" : ""}">${pct(a.mrg_liq)}</dd></div>
         <div><dt>Dív/PL</dt><dd>${fmt(a.div_pl)}</dd></div>
+        <div><dt>Rec. 5 anos</dt><dd class="${a.cresc5a < 0 ? "neg" : ""}">${a.cresc5a == null ? "—" : (a.cresc5a > 0 ? "+" : "") + pct(a.cresc5a)}</dd></div>
         <div><dt>Liq. 2m</dt><dd>${liqFmt(a.liq2m)}</dd></div>
       </dl>
     </li>`;
