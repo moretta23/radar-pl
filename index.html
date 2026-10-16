@@ -35,7 +35,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font
 .wrap { max-width: 640px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(40px + env(safe-area-inset-bottom, 0px)); }
 
 header.top {
-  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  background: var(--bg);
   padding-block: calc(14px + env(safe-area-inset-top, 0px)) 10px;
   border-bottom: 1px solid var(--line); display: grid; gap: 10px;
 }
@@ -55,9 +55,10 @@ h1 span { color: var(--accent); }
 select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
 .chip { cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
 .chip input { accent-color: var(--accent); margin: 0; }
-.slider { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; }
+.slider { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
+.slider label.rot { flex: none; width: 6.2em; }
 .slider input { flex: 1; accent-color: var(--accent); }
-.slider output { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; min-width: 3ch; text-align: right; font-variant-numeric: tabular-nums; }
+.slider output { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; min-width: 4.2ch; text-align: right; font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .lista { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
@@ -102,6 +103,16 @@ footer a { color: var(--accent); }
         <label class="rot" for="max">P/L máx.</label>
         <input id="max" type="range" min="1" max="15" step="0.5" value="7">
         <output id="maxOut" for="max">7</output>
+      </div>
+      <div class="slider">
+        <label class="rot" for="pvpMin">P/VP mín.</label>
+        <input id="pvpMin" type="range" min="0" max="5" step="0.1" value="0">
+        <output id="pvpMinOut" for="pvpMin">livre</output>
+      </div>
+      <div class="slider">
+        <label class="rot" for="pvpMax">P/VP máx.</label>
+        <input id="pvpMax" type="range" min="0" max="5" step="0.1" value="5">
+        <output id="pvpMaxOut" for="pvpMax">livre</output>
       </div>
     </div>
     <div class="linha">
@@ -149,7 +160,8 @@ function liqFmt(v) {
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-const ctrl = ["busca", "max", "ordem", "liq", "pos"];
+const ctrl = ["busca", "max", "pvpMin", "pvpMax", "ordem", "liq", "pos"];
+const PVP_TOPO = 5; // P/VP máx. no fim da barra = sem limite
 try {
   const s = JSON.parse(localStorage.getItem("radar-pl") || "{}");
   ctrl.forEach(k => { if (s[k] != null) { if (k === "pos") $(k).checked = s[k]; else $(k).value = s[k]; } });
@@ -164,11 +176,23 @@ function render() {
   const maxStr = fmt(max, max % 1 ? 1 : 0);
   $("maxOut").textContent = maxStr;
   $("maxTxt").textContent = maxStr;
-  try { localStorage.setItem("radar-pl", JSON.stringify({ busca: $("busca").value, max: $("max").value, ordem: ord, liq: $("liq").value, pos })); } catch (e) {}
+  const pvpMin = parseFloat($("pvpMin").value);
+  const pvpMax = parseFloat($("pvpMax").value);
+  const semMin = pvpMin <= 0, semMax = pvpMax >= PVP_TOPO;
+  $("pvpMinOut").textContent = semMin ? "livre" : fmt(pvpMin, 1);
+  $("pvpMaxOut").textContent = semMax ? "livre" : fmt(pvpMax, 1);
+  try {
+    const s = {};
+    ctrl.forEach(k => { s[k] = k === "pos" ? $(k).checked : $(k).value; });
+    localStorage.setItem("radar-pl", JSON.stringify(s));
+  } catch (e) {}
   if (!acoes.length) return;
 
+  // Com qualquer limite de P/VP ativo, fica de fora P/VP negativo (patrimônio negativo).
+  const pvpOk = a => (semMin && semMax) ||
+    (a.pvp != null && a.pvp > 0 && (semMin || a.pvp >= pvpMin) && (semMax || a.pvp <= pvpMax));
   const r = acoes.filter(a => a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (a.liq2m || 0) >= liq &&
-    (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
+    pvpOk(a) && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
   const asc = ord === "pl" || ord === "pvp";
   r.sort((a, b) => {
     const x = a[ord], y = b[ord];
@@ -214,6 +238,13 @@ async function carregar() {
 }
 
 ctrl.forEach(k => $(k).addEventListener("input", render));
+// O mínimo nunca passa do máximo: arrastar um empurra o outro.
+$("pvpMin").addEventListener("input", () => {
+  if (+$("pvpMin").value > +$("pvpMax").value) { $("pvpMax").value = $("pvpMin").value; render(); }
+}, true);
+$("pvpMax").addEventListener("input", () => {
+  if (+$("pvpMax").value < +$("pvpMin").value) { $("pvpMin").value = $("pvpMax").value; render(); }
+}, true);
 render();
 carregar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
