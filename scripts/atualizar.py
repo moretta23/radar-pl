@@ -25,7 +25,7 @@ COLS = ["papel", "cotacao", "pl", "pvp", "psr", "dy", "p_ativo", "p_capgiro",
         "p_ebit", "p_acl", "ev_ebit", "ev_ebitda", "mrg_bruta", "mrg_ebit",
         "mrg_liq", "liq_corr", "roic", "roe", "liq2m", "patrim", "div_pl",
         "cresc5a"]
-MANTER = ["cotacao", "pl", "pvp", "dy", "roe", "mrg_liq", "liq2m", "div_pl", "ev_ebit"]
+MANTER = ["cotacao", "pl", "pvp", "dy", "roe", "mrg_liq", "liq2m", "div_pl", "ev_ebit", "cresc5a"]
 
 
 def baixar(url=URL):

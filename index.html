@@ -166,6 +166,7 @@ footer a { color: var(--accent); }
         <option value="10000000">≥ R$ 10 mi/dia</option>
       </select></span>
       <label class="chip"><input id="pos" type="checkbox" checked> Só P/L positivo</label>
+      <label class="chip"><input id="cresc" type="checkbox"> Receita crescendo (5 anos)</label>
     </div>
   </header>
 
@@ -194,12 +195,12 @@ function liqFmt(v) {
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "roeMin", "mrgMin", "setor", "ordem", "liq", "pos"];
+const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "roeMin", "mrgMin", "setor", "ordem", "liq", "pos", "cresc"];
 let salvo = {};
 const PVP_TOPO = 5; // P/VP máx. no fim da barra = sem limite
 try {
   const s = salvo = JSON.parse(localStorage.getItem("radar-pl") || "{}");
-  ctrl.forEach(k => { if (s[k] != null) { if (k === "pos") $(k).checked = s[k]; else $(k).value = s[k]; } });
+  ctrl.forEach(k => { if (s[k] != null) { if ($(k).type === "checkbox") $(k).checked = s[k]; else $(k).value = s[k]; } });
 } catch (e) {}
 
 function render() {
@@ -207,6 +208,7 @@ function render() {
   const q = $("busca").value.trim().toLowerCase();
   const liq = parseFloat($("liq").value);
   const pos = $("pos").checked;
+  const cresc = $("cresc").checked; // crescimento da receita nos últimos 5 anos > 0
   const ord = $("ordem").value;
   const maxStr = fmt(max, max % 1 ? 1 : 0);
   $("maxOut").textContent = maxStr;
@@ -224,7 +226,7 @@ function render() {
   $("mrgMinOut").textContent = mrgMin > 0 ? mrgMin + "%" : "livre";
   try {
     const s = {};
-    ctrl.forEach(k => { s[k] = k === "pos" ? $(k).checked : $(k).value; });
+    ctrl.forEach(k => { s[k] = $(k).type === "checkbox" ? $(k).checked : $(k).value; });
     localStorage.setItem("radar-pl", JSON.stringify(s));
   } catch (e) {}
   if (!acoes.length) return;
@@ -233,7 +235,7 @@ function render() {
   const pvpOk = a => (semMin && semMax) ||
     (a.pvp != null && a.pvp > 0 && (semMin || a.pvp >= pvpMin) && (semMax || a.pvp <= pvpMax));
   const setor = $("setor").value;
-  const r = acoes.filter(a => (!setor || a.s === setor) && a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (a.liq2m || 0) >= liq &&
+  const r = acoes.filter(a => (!setor || a.s === setor) && a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (!cresc || (a.cresc5a != null && a.cresc5a > 0)) && (a.liq2m || 0) >= liq &&
     pvpOk(a) && a.div_pl != null && a.div_pl <= divMax + 1e-9 &&
     (roeMin <= 0 || (a.roe != null && a.roe >= roeMin)) &&
     (mrgMin <= 0 || (a.mrg_liq != null && a.mrg_liq >= mrgMin)) && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
