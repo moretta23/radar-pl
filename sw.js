@@ -1,5 +1,5 @@
 // Guarda o app para abrir sem internet; os dados vêm da rede quando possível.
-const CACHE = "radar-pl-v6";
+const CACHE = "radar-pl-v7";
 const ARQUIVOS = ["./", "index.html", "manifest.webmanifest", "dados.json",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/favicon.png"];
 
