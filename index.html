@@ -47,6 +47,23 @@ header.top {
 .nomeapp { display: grid; gap: 2px; }
 h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.9rem; margin: 0; line-height: 1; }
 .contagem { font-family: var(--f-display); font-size: 1.05rem; color: var(--muted); white-space: nowrap; text-align: right; }
+.direita { display: flex; align-items: center; gap: 10px; }
+.btn-qr { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--accent); cursor: pointer; padding: 0; }
+.btn-qr svg { width: 22px; height: 22px; }
+dialog.compartilhar { border: none; border-radius: 16px; padding: 20px; width: min(340px, calc(100vw - 32px));
+  background: var(--surface); color: var(--fg); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+dialog.compartilhar::backdrop { background: rgba(6, 20, 14, .6); }
+.compartilhar h2 { font-family: var(--f-display); font-size: 1.5rem; margin: 0 0 4px; }
+.compartilhar p { margin: 0; font-size: .85rem; color: var(--muted); line-height: 1.45; }
+.compartilhar .qr { display: block; width: 100%; max-width: 250px; height: auto; aspect-ratio: 1; margin: 12px auto 8px; border-radius: 12px; background: #fff; }
+.compartilhar .link { font-size: .78rem; word-break: break-all; text-align: center; color: var(--fg); user-select: all; }
+.compartilhar .acoes { display: flex; gap: 8px; margin-top: 14px; }
+.compartilhar .acoes button { flex: 1; font: inherit; font-size: .9rem; font-weight: 600; padding: 10px; border-radius: 10px; cursor: pointer; }
+.compartilhar .prim { background: var(--accent); color: var(--surface); border: 1px solid var(--accent); }
+.compartilhar .sec { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+.compartilhar .instalar { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.compartilhar .instalar b { color: var(--fg); }
 .contagem b { color: var(--fg); font-size: 1.4rem; font-weight: 600; }
 .tesouro { display: flex; align-items: center; justify-content: space-between; gap: 12px;
   background: var(--gold); color: var(--gold-ink); border: 1px solid var(--gold-edge);
@@ -104,7 +121,15 @@ footer a { color: var(--accent); }
           <h1>Método Tempo</h1>
         </div>
       </div>
-      <div class="contagem"><b id="qtd">–</b> empresas</div>
+      <div class="direita">
+        <div class="contagem"><b id="qtd">–</b> empresas</div>
+        <button id="abrirQr" class="btn-qr" type="button" aria-label="Compartilhar o app (QR code)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="tesouro" id="tesouro" hidden>
       <div>
@@ -183,6 +208,21 @@ footer a { color: var(--accent); }
     Liquidez = volume médio diário dos últimos 2 meses. Não é recomendação de investimento.
   </footer>
 </div>
+
+<dialog id="dlgQr" class="compartilhar" aria-labelledby="qrTitulo">
+  <h2 id="qrTitulo">Compartilhar o Método Tempo</h2>
+  <p>Peça para apontarem a câmera do celular para o código.</p>
+  <img class="qr" src="icons/qrcode.png" alt="QR code do app Método Tempo" width="602" height="602">
+  <div class="link" id="qrLink">https://moretta23.github.io/radar-pl/</div>
+  <div class="acoes">
+    <button id="qrEnviar" class="prim" type="button">Enviar link</button>
+    <button id="qrFechar" class="sec" type="button">Fechar</button>
+  </div>
+  <div class="instalar">
+    <p><b>Android:</b> abrir no Chrome → ⋮ → Instalar app.</p>
+    <p><b>iPhone:</b> abrir no Safari → Compartilhar → Adicionar à Tela de Início.</p>
+  </div>
+</dialog>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -301,6 +341,22 @@ async function carregar() {
 }
 
 ctrl.forEach(k => $(k).addEventListener("input", render));
+
+// Janela de compartilhar: QR code + enviar link (WhatsApp etc.) ou copiar.
+const LINK_APP = "https://moretta23.github.io/radar-pl/";
+$("abrirQr").addEventListener("click", () => $("dlgQr").showModal());
+$("qrFechar").addEventListener("click", () => $("dlgQr").close());
+$("dlgQr").addEventListener("click", e => { if (e.target === $("dlgQr")) $("dlgQr").close(); });
+$("qrEnviar").addEventListener("click", async () => {
+  const b = $("qrEnviar");
+  if (navigator.share) {
+    try { await navigator.share({ title: "Método Tempo", text: "Instale o app Método Tempo:", url: LINK_APP }); } catch (e) {}
+    return;
+  }
+  try { await navigator.clipboard.writeText(LINK_APP); b.textContent = "Link copiado"; }
+  catch (e) { getSelection().selectAllChildren($("qrLink")); b.textContent = "Copie o link acima"; }
+  setTimeout(() => { b.textContent = "Enviar link"; }, 2500);
+});
 // O mínimo nunca passa do máximo: arrastar um empurra o outro.
 $("pvpMin").addEventListener("input", () => {
   if (+$("pvpMin").value > +$("pvpMax").value) { $("pvpMax").value = $("pvpMin").value; render(); }
