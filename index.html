@@ -72,7 +72,7 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 .pl .k { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
 .regua { height: 4px; background: var(--track); border-radius: 2px; overflow: hidden; }
 .regua i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
-.metr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; }
+.metr { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 0; }
 .metr div { display: grid; gap: 1px; }
 .metr dt { font-size: .64rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .metr dd { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
@@ -81,7 +81,7 @@ select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radi
 footer { margin-top: 20px; font-size: .78rem; color: var(--muted); line-height: 1.5; }
 footer a { color: var(--accent); }
 .grupo { display: inline-flex; align-items: center; gap: 6px; }
-@media (max-width: 340px) { .metr { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 340px) { .metr { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 </style>
 </head>
 <body>
@@ -113,6 +113,11 @@ footer a { color: var(--accent); }
         <label class="rot" for="pvpMax">P/VP máx.</label>
         <input id="pvpMax" type="range" min="0" max="5" step="0.1" value="5">
         <output id="pvpMaxOut" for="pvpMax">livre</output>
+      </div>
+      <div class="slider">
+        <label class="rot" for="divMax">Dív/PL máx.</label>
+        <input id="divMax" type="range" min="0" max="1" step="0.1" value="0.5">
+        <output id="divMaxOut" for="divMax">0,5</output>
       </div>
     </div>
     <div class="linha">
@@ -160,7 +165,7 @@ function liqFmt(v) {
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-const ctrl = ["busca", "max", "pvpMin", "pvpMax", "ordem", "liq", "pos"];
+const ctrl = ["busca", "max", "pvpMin", "pvpMax", "divMax", "ordem", "liq", "pos"];
 const PVP_TOPO = 5; // P/VP máx. no fim da barra = sem limite
 try {
   const s = JSON.parse(localStorage.getItem("radar-pl") || "{}");
@@ -181,6 +186,8 @@ function render() {
   const semMin = pvpMin <= 0, semMax = pvpMax >= PVP_TOPO;
   $("pvpMinOut").textContent = semMin ? "livre" : fmt(pvpMin, 1);
   $("pvpMaxOut").textContent = semMax ? "livre" : fmt(pvpMax, 1);
+  const divMax = parseFloat($("divMax").value);
+  $("divMaxOut").textContent = fmt(divMax, 1);
   try {
     const s = {};
     ctrl.forEach(k => { s[k] = k === "pos" ? $(k).checked : $(k).value; });
@@ -192,7 +199,7 @@ function render() {
   const pvpOk = a => (semMin && semMax) ||
     (a.pvp != null && a.pvp > 0 && (semMin || a.pvp >= pvpMin) && (semMax || a.pvp <= pvpMax));
   const r = acoes.filter(a => a.pl != null && a.pl <= max && (!pos || a.pl > 0) && (a.liq2m || 0) >= liq &&
-    pvpOk(a) && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
+    pvpOk(a) && a.div_pl != null && a.div_pl <= divMax + 1e-9 && (!q || a.t.toLowerCase().includes(q) || a.n.toLowerCase().includes(q)));
   const asc = ord === "pl" || ord === "pvp";
   r.sort((a, b) => {
     const x = a[ord], y = b[ord];
@@ -219,6 +226,7 @@ function render() {
         <div><dt>P/VP</dt><dd>${fmt(a.pvp)}</dd></div>
         <div><dt>ROE</dt><dd class="${a.roe < 0 ? "neg" : ""}">${pct(a.roe)}</dd></div>
         <div><dt>Liq. 2m</dt><dd>${liqFmt(a.liq2m)}</dd></div>
+        <div><dt>Dív/PL</dt><dd>${fmt(a.div_pl)}</dd></div>
       </dl>
     </li>`;
   }).join("");
