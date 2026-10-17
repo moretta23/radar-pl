@@ -56,6 +56,9 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 - Fichas: ticker (link para o Fundamentus), nome, setor, P/L e cotação, régua
   do P/L, e 7 indicadores: DY, P/VP, ROE, margem líq., Dív/PL, Rec. 5 anos, liquidez.
 - Os filtros escolhidos ficam salvos no celular de cada pessoa.
+- Aviso verde "Instale o Mais Tempo" (17/10/2026), como no Simulador de FII: no Android
+  usa o botão de instalar do Chrome; sem ele (logo após desinstalar, ou página aberta
+  pelo navegador da câmera) e no iPhone, mostra o caminho pelo menu. O ✕ esconde de vez.
 
 ## Pontos de atenção
 
