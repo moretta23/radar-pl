@@ -7,142 +7,178 @@
 <meta name="application-name" content="Método Tempo">
 <meta name="apple-mobile-web-app-title" content="Método Tempo">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="Ações da B3 com P/L até 7, com dados do Fundamentus.">
-<meta name="theme-color" content="#f3f5f2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1411" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Ações da B3 com P/L baixo, com dados do Fundamentus. Vamos Juntos · Vivendo Capital.">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icons/favicon.png" sizes="48x48" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&family=Permanent+Marker&display=swap">
 <style>
-/* Layout: uma coluna de fichas de ativo, com régua de P/L em cada uma; filtros fixos no topo. */
+/* Mesma cara do Simulador de FII. Paleta do logo Vamos Juntos · Vivendo Capital:
+   preto, laranja-dourado (P/L, preço) e verde (empresas que passam no filtro). */
 :root {
-  --bg: #f3f5f2; --surface: #ffffff; --fg: #142019; --muted: #5d6b62; --line: #dde3dd;
-  --accent: #0b7a4b; --track: #e7ece7; --warn: #a35a00;
-  --gold: #ffd678; --gold-ink: #3a2a00; --gold-edge: #e9b84a;
-  --f-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
-  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color-scheme: light;
+  --fundo: #0A0A0A; --card: #151515; --card2: #1D1D1D; --campo: #0F0F0F;
+  --texto: #F4EFE6; --suave: #9C968B; --linha: #2A2A2A;
+  --laranja: #F6B651; --laranja-forte: #E99A2C; --laranja-fundo: #2B200F;
+  --verde: #74D352; --verde-forte: #4FB534; --verde-fundo: #14240E;
+  --vermelho: #FF5A4F; --vermelho-fundo: #2B1110;
+  --marca: "Permanent Marker", "Segoe Print", cursive;
+  --base: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e1411; --surface: #161e19; --fg: #e4ece6; --muted: #93a39a; --line: #26322b;
-    --accent: #3fcf8a; --track: #223029; --warn: #f0a650; color-scheme: dark;
-    --gold: #ffd678; --gold-ink: #2b1f00; --gold-edge: #ffd678;
-  }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--base); }
+body { min-height: 100vh; font-size: 15px; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
+.app { max-width: 560px; margin: 0 auto; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+
+/* Cabeçalho */
+.topo {
+  position: relative; overflow: hidden; background: #000;
+  padding: calc(14px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 22px max(20px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--linha); border-radius: 0 0 32px 32px; display: grid; gap: 14px;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px;
-  -webkit-tap-highlight-color: transparent; }
-.wrap { max-width: 640px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(40px + env(safe-area-inset-bottom, 0px)); }
-
-header.top {
-  background: var(--bg);
-  padding-block: calc(14px + env(safe-area-inset-top, 0px)) 10px;
-  border-bottom: 1px solid var(--line); display: grid; gap: 10px;
+.brilho { position: absolute; width: 220px; height: 220px; border-radius: 50%; opacity: .08; pointer-events: none; }
+.marca { display: flex; align-items: center; gap: 12px; position: relative; }
+.marca img { width: 62px; height: 62px; border-radius: 16px; flex: none; }
+.marca > div { min-width: 0; }
+.marca h1 { margin: 0; font: 400 clamp(22px, 6.8vw, 30px)/1.2 var(--marca); color: var(--laranja); white-space: nowrap; }
+.assinatura { font-weight: 800; font-size: clamp(9px, 2.6vw, 11px); letter-spacing: .1em; color: var(--verde); white-space: nowrap; }
+.icone-btn {
+  margin-left: auto; width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--linha);
+  background: var(--card); display: grid; place-items: center; flex: none; padding: 0;
 }
-.titulo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.marca { display: flex; align-items: center; gap: 10px; }
-.marca img { width: 40px; height: 40px; border-radius: 10px; }
-.nomeapp { display: grid; gap: 2px; }
-h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.9rem; margin: 0; line-height: 1; }
-.contagem { font-family: var(--f-display); font-size: 1.05rem; color: var(--muted); white-space: nowrap; text-align: right; }
-.direita { display: flex; align-items: center; gap: 10px; }
-.btn-qr { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 10px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--accent); cursor: pointer; padding: 0; }
-.btn-qr svg { width: 22px; height: 22px; }
-dialog.compartilhar { border: none; border-radius: 16px; padding: 20px; width: min(340px, calc(100vw - 32px));
-  background: var(--surface); color: var(--fg); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-dialog.compartilhar::backdrop { background: rgba(6, 20, 14, .6); }
-.compartilhar h2 { font-family: var(--f-display); font-size: 1.5rem; margin: 0 0 4px; }
-.compartilhar p { margin: 0; font-size: .85rem; color: var(--muted); line-height: 1.45; }
-.compartilhar .qr { display: block; width: 100%; max-width: 250px; height: auto; aspect-ratio: 1; margin: 12px auto 8px; border-radius: 12px; background: #fff; }
-.compartilhar .link { font-size: .78rem; word-break: break-all; text-align: center; color: var(--fg); user-select: all; }
-.compartilhar .acoes { display: flex; gap: 8px; margin-top: 14px; }
-.compartilhar .acoes button { flex: 1; font: inherit; font-size: .9rem; font-weight: 600; padding: 10px; border-radius: 10px; cursor: pointer; }
-.compartilhar .prim { background: var(--accent); color: var(--surface); border: 1px solid var(--accent); }
-.compartilhar .sec { background: transparent; color: var(--fg); border: 1px solid var(--line); }
-.compartilhar .instalar { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
-.compartilhar .instalar b { color: var(--fg); }
-.contagem b { color: var(--fg); font-size: 1.4rem; font-weight: 600; }
-.tesouro { display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--gold); color: var(--gold-ink); border: 1px solid var(--gold-edge);
-  border-radius: 12px; padding: 10px 14px; }
-.tesouro .tk { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; }
-.tesouro .tv { font-family: var(--f-display); font-weight: 700; font-size: 2.3rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.tesouro .ts { font-size: .8rem; text-align: right; line-height: 1.35; }
-.tesouro .ts b { font-family: var(--f-display); font-size: 1.15rem; font-weight: 600; }
+.icone-btn svg { width: 22px; height: 22px; }
+.sub { margin: 0; color: var(--suave); font-weight: 700; font-size: 14px; position: relative; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--suave); position: relative; }
+.ponto { width: 8px; height: 8px; border-radius: 50%; background: var(--verde); flex: none; }
 
-.busca { width: 100%; font: inherit; font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
-.linha { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.rot { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-select, .chip { font: inherit; font-size: .85rem; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
-.chip { cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
-.linha.chips { flex-wrap: nowrap; gap: 6px; }
-.linha.chips .chip { white-space: nowrap; font-size: .8rem; padding: 6px 9px; }
-.chip input { accent-color: var(--accent); margin: 0; }
-.slider { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
-.slider label.rot { flex: none; width: 8.4em; white-space: nowrap; }
-.slider input { flex: 1; accent-color: var(--accent); }
-.slider output { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; min-width: 4.2ch; text-align: right; font-variant-numeric: tabular-nums; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Cards de números (P/L do Tesouro e empresas) */
+.grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; position: relative; }
+.num { border-radius: 22px; padding: 14px 16px; display: grid; gap: 2px; min-width: 0; border: 1px solid var(--linha); background: var(--card); }
+.num .rot { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.num .val { font-weight: 900; font-size: 30px; line-height: 1.1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.num .det { font-size: 12px; font-weight: 700; color: var(--suave); }
+.num .det b { color: var(--texto); font-weight: 900; }
+.num.verde { background: var(--verde-fundo); border-color: rgba(116,211,82,.35); }
+.num.verde .rot, .num.verde .val { color: var(--verde); }
+.num.laranja { background: var(--laranja-fundo); border-color: rgba(246,182,81,.35); }
+.num.laranja .rot, .num.laranja .val { color: var(--laranja); }
 
-.lista { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
-.ficha { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.corpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 18px max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
+.busca { width: 100%; background: var(--card); border: 1.5px solid var(--linha); border-radius: 16px; padding: 12px 16px; font-weight: 700; font-size: 16px; outline: none; }
+.busca:focus { border-color: var(--laranja); }
+.busca::placeholder { color: var(--suave); }
+
+/* Filtros */
+.card { background: var(--card); border: 1px solid var(--linha); border-radius: 24px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.card h2 { margin: 0; font: 400 20px/1.2 var(--marca); color: var(--laranja); }
+.rot { font-size: 13px; font-weight: 700; color: var(--suave); }
+.slider { display: flex; align-items: center; gap: 12px; }
+.slider label.rot { flex: none; width: 7.6em; white-space: nowrap; }
+.slider output { font-weight: 900; font-size: 16px; min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--laranja); }
+input[type=range] { flex: 1; min-width: 0; appearance: none; -webkit-appearance: none; height: 28px; background: transparent; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--linha); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--linha); }
+input[type=range]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--laranja-forte); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: var(--laranja); border: 3px solid #000; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--laranja); border: 3px solid #000; }
+.campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.campo { display: grid; gap: 6px; min-width: 0; }
+.campo.largo { grid-column: 1 / -1; }
+select {
+  width: 100%; min-width: 0; appearance: none; -webkit-appearance: none; background: var(--campo); border: 1.5px solid var(--linha);
+  border-radius: 14px; padding: 11px 34px 11px 12px; font-weight: 800; font-size: 15px; outline: none; text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F6B651' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
+}
+select:focus { border-color: var(--laranja); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--linha); background: var(--card2); border-radius: 999px; padding: 8px 14px; font-weight: 800; font-size: 13px; cursor: pointer; user-select: none; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:has(input:checked) { background: var(--verde); border-color: var(--verde); color: #000; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--laranja); outline-offset: 2px; }
+
+/* Fichas das empresas */
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ficha { background: var(--card); border: 1px solid var(--linha); border-radius: 22px; padding: 14px 16px; display: grid; gap: 10px; }
 .cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .id { min-width: 0; }
-.ticker { font-family: var(--f-display); font-weight: 700; font-size: 1.35rem; letter-spacing: .03em; color: var(--fg); text-decoration: none; }
-.nome { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ticker { font-weight: 900; font-size: 19px; letter-spacing: .02em; color: var(--texto); text-decoration: none; }
+.nome { font-size: 12px; font-weight: 700; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.selo { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; background: var(--card2); color: var(--suave); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pl { text-align: right; flex: none; }
-.pl .v { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
-.pl .k { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-.regua { height: 4px; background: var(--track); border-radius: 2px; overflow: hidden; }
-.regua i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
-.metr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; margin: 0; }
-.metr div { display: grid; gap: 1px; }
-.metr dt { font-size: .64rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.metr dd { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
-.metr dd.neg { color: var(--warn); }
-.aviso { text-align: center; color: var(--muted); padding: 40px 0; line-height: 1.5; }
-footer { margin-top: 20px; font-size: .78rem; color: var(--muted); line-height: 1.5; }
-footer a { color: var(--accent); }
-.grupo { display: inline-flex; align-items: center; gap: 6px; }
-.grupo.setor { flex: 1; min-width: 0; }
-.grupo.setor select { flex: 1; min-width: 0; }
+.pl .v { font-weight: 900; font-size: 26px; color: var(--laranja); line-height: 1; font-variant-numeric: tabular-nums; }
+.pl .k { font-size: 11px; font-weight: 800; color: var(--suave); margin-top: 4px; }
+.regua { height: 6px; background: var(--linha); border-radius: 3px; overflow: hidden; }
+.regua i { display: block; height: 100%; background: var(--verde); border-radius: 3px; }
+.metr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; margin: 0; }
+.metr div { display: grid; gap: 1px; min-width: 0; }
+.metr dt { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); white-space: nowrap; }
+.metr dd { margin: 0; font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.metr dd.neg { color: var(--vermelho); }
+.aviso { text-align: center; color: var(--suave); font-weight: 700; padding: 32px 0; line-height: 1.5; margin: 0; }
+.nota { font-size: 12px; line-height: 1.5; color: var(--suave); margin: 0; padding: 0 4px; }
+.nota a { color: var(--laranja); }
+
+/* Janela de compartilhar */
+dialog.compartilhar { border: 1px solid var(--linha); border-radius: 28px; padding: 22px; width: min(360px, calc(100vw - 32px));
+  background: var(--fundo); color: var(--texto); }
+dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
+.compartilhar h2 { font: 400 24px/1.2 var(--marca); color: var(--laranja); margin: 0 0 6px; }
+.compartilhar p { margin: 0; font-size: 14px; font-weight: 600; color: var(--suave); line-height: 1.45; }
+.compartilhar .qr { display: block; width: 100%; max-width: 250px; height: auto; aspect-ratio: 1; margin: 14px auto 8px; border-radius: 16px; background: #fff; }
+.compartilhar .link { font-size: 13px; font-weight: 700; word-break: break-all; text-align: center; color: var(--texto); user-select: all; }
+.compartilhar .acoes { display: flex; gap: 8px; margin-top: 16px; }
+.btn { flex: 1; border: 0; border-radius: 14px; padding: 12px 16px; font-weight: 900; font-size: 14px; background: var(--verde); color: #000; }
+.btn.fantasma { background: var(--card2); color: var(--texto); border: 1px solid var(--linha); }
+.compartilhar .instalar { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); display: grid; gap: 6px; }
+.compartilhar .instalar b { color: var(--texto); }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="titulo">
-      <div class="marca">
-        <img src="icons/icon-192.png" alt="">
-        <div class="nomeapp">
-          <h1>Método Tempo</h1>
-        </div>
-      </div>
-      <div class="direita">
-        <div class="contagem"><b id="qtd">–</b> empresas</div>
-        <button id="abrirQr" class="btn-qr" type="button" aria-label="Compartilhar o app (QR code)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-    <div class="tesouro" id="tesouro" hidden>
+<div class="app">
+  <header class="topo">
+    <div class="brilho" style="top:-80px;right:-70px;background:var(--verde)"></div>
+    <div class="brilho" style="bottom:-100px;left:-80px;background:var(--laranja)"></div>
+    <div class="marca">
+      <img src="icons/icon-192.png" alt="">
       <div>
-        <div class="tk">P/L do Tesouro hoje</div>
-        <div class="tv" id="tesPl">–</div>
+        <h1>Método Tempo</h1>
+        <div class="assinatura">VAMOS JUNTOS · VIVENDO CAPITAL</div>
       </div>
-      <div class="ts">Selic<br><b id="tesSelic">–</b> ao ano</div>
+      <button id="abrirQr" class="icone-btn" type="button" aria-label="Compartilhar o app (QR code)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F6B651" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+      </button>
     </div>
+    <p class="sub">Ações da B3 com P/L baixo, para comparar com o que o Tesouro paga.</p>
+    <div class="grade">
+      <div class="num laranja" id="tesouro">
+        <span class="rot">P/L do Tesouro</span>
+        <span class="val" id="tesPl">–</span>
+        <span class="det">Selic <b id="tesSelic">–</b> ao ano</span>
+      </div>
+      <div class="num verde">
+        <span class="rot">Empresas</span>
+        <span class="val" id="qtd">–</span>
+        <span class="det">com os filtros abaixo</span>
+      </div>
+    </div>
+    <div class="status"><span class="ponto"></span><span>Fundamentus · dados de <span id="data">…</span></span></div>
+  </header>
+
+  <main class="corpo">
     <input id="busca" class="busca" type="search" placeholder="Buscar ticker ou empresa" aria-label="Buscar ticker ou empresa">
-    <div class="linha">
+
+    <section class="card" aria-label="Filtros">
+      <h2>Filtros</h2>
       <div class="slider">
         <label class="rot" for="max">P/L máx.</label>
         <input id="max" type="range" min="1" max="30" step="0.5" value="7">
@@ -173,53 +209,57 @@ footer a { color: var(--accent); }
         <input id="mrgMin" type="range" min="0" max="40" step="1" value="0">
         <output id="mrgMinOut" for="mrgMin">livre</output>
       </div>
-    </div>
-    <div class="linha">
-      <span class="grupo setor"><label class="rot" for="setor">Setor</label>
-      <select id="setor"><option value="">Todos os setores</option></select></span>
-    </div>
-    <div class="linha">
-      <span class="grupo"><label class="rot" for="ordem">Ordem</label>
-      <select id="ordem">
-        <option value="pl">Menor P/L</option>
-        <option value="dy">Maior Div. Yield</option>
-        <option value="roe">Maior ROE</option>
-        <option value="mrg_liq">Maior margem líquida</option>
-        <option value="liq2m">Maior liquidez</option>
-        <option value="pvp">Menor P/VP</option>
-      </select></span>
-      <span class="grupo"><label class="rot" for="liq">Liquidez</label>
-      <select id="liq">
-        <option value="0">Todas</option>
-        <option value="100000" selected>≥ R$ 100 mil/dia</option>
-        <option value="1000000">≥ R$ 1 mi/dia</option>
-        <option value="10000000">≥ R$ 10 mi/dia</option>
-      </select></span>
-    </div>
-    <div class="linha chips">
-      <label class="chip"><input id="pos" type="checkbox" checked> Só P/L positivo</label>
-      <label class="chip"><input id="cresc" type="checkbox"> Receita crescendo (5 anos)</label>
-    </div>
-  </header>
+      <div class="campos">
+        <div class="campo largo">
+          <label class="rot" for="setor">Setor</label>
+          <select id="setor"><option value="">Todos os setores</option></select>
+        </div>
+        <div class="campo">
+          <label class="rot" for="ordem">Ordem</label>
+          <select id="ordem">
+            <option value="pl">Menor P/L</option>
+            <option value="dy">Maior Div. Yield</option>
+            <option value="roe">Maior ROE</option>
+            <option value="mrg_liq">Maior margem líquida</option>
+            <option value="liq2m">Maior liquidez</option>
+            <option value="pvp">Menor P/VP</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label class="rot" for="liq">Liquidez</label>
+          <select id="liq">
+            <option value="0">Todas</option>
+            <option value="100000" selected>≥ R$ 100 mil/dia</option>
+            <option value="1000000">≥ R$ 1 mi/dia</option>
+            <option value="10000000">≥ R$ 10 mi/dia</option>
+          </select>
+        </div>
+      </div>
+      <div class="chips">
+        <label class="chip"><input id="pos" type="checkbox" checked> Só P/L positivo</label>
+        <label class="chip"><input id="cresc" type="checkbox"> Receita crescendo (5 anos)</label>
+      </div>
+    </section>
 
-  <ul id="lista" class="lista"></ul>
-  <p id="aviso" class="aviso">Carregando dados…</p>
+    <ul id="lista" class="lista"></ul>
+    <p id="aviso" class="aviso">Carregando dados…</p>
 
-  <footer>
-    Dados de <a href="https://www.fundamentus.com.br/resultado.php" target="_blank" rel="noopener">fundamentus.com.br</a>,
-    capturados em <span id="data">—</span>. Atualizados todo dia útil à noite.
-    Liquidez = volume médio diário dos últimos 2 meses. Não é recomendação de investimento.
-  </footer>
+    <p class="nota">
+      Dados de <a href="https://www.fundamentus.com.br/resultado.php" target="_blank" rel="noopener">fundamentus.com.br</a>,
+      atualizados todo dia útil às 19h. P/L do Tesouro = 100 ÷ Selic.
+      Liquidez = volume médio diário dos últimos 2 meses. Não é recomendação de investimento.
+    </p>
+  </main>
 </div>
 
 <dialog id="dlgQr" class="compartilhar" aria-labelledby="qrTitulo">
   <h2 id="qrTitulo">Compartilhar o Método Tempo</h2>
   <p>Peça para apontarem a câmera do celular para o código.</p>
-  <img class="qr" src="icons/qrcode.png" alt="QR code do app Método Tempo" width="602" height="602">
+  <img class="qr" src="icons/qrcode.png" alt="QR code do app Método Tempo" width="600" height="600">
   <div class="link" id="qrLink">https://vendas.moretta.com.br/metodo/</div>
   <div class="acoes">
-    <button id="qrEnviar" class="prim" type="button">Enviar link</button>
-    <button id="qrFechar" class="sec" type="button">Fechar</button>
+    <button id="qrEnviar" class="btn" type="button">Enviar link</button>
+    <button id="qrFechar" class="btn fantasma" type="button">Fechar</button>
   </div>
   <div class="instalar">
     <p><b>Android:</b> abrir no Chrome → ⋮ → Instalar app.</p>
@@ -303,7 +343,7 @@ function render() {
         <div class="id">
           <a class="ticker" href="https://www.fundamentus.com.br/detalhes.php?papel=${encodeURIComponent(a.t)}" target="_blank" rel="noopener">${esc(a.t)}</a>
           <div class="nome">${esc(a.n)}</div>
-          ${a.s ? `<div class="nome">${esc(a.s)}</div>` : ""}
+          ${a.s ? `<span class="selo">${esc(a.s)}</span>` : ""}
         </div>
         <div class="pl"><div class="v">${fmt(a.pl)}</div><div class="k">P/L · R$ ${fmt(a.cotacao)}</div></div>
       </div>

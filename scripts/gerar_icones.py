@@ -1,5 +1,6 @@
 """Desenha o ícone do Método Tempo: barras de P/L com uma linha de corte;
-as barras abaixo da linha (as baratas) ficam em verde-menta.
+as barras abaixo da linha (as baratas) ficam em verde. Paleta da Vamos Juntos ·
+Vivendo Capital: preto, laranja #F6B651 e verde #74D352.
 
 Uso:  python scripts/gerar_icones.py
 """
@@ -9,11 +10,11 @@ from PIL import Image, ImageDraw
 SAIDA = Path(__file__).resolve().parent.parent / "app" / "icons"
 S = 4  # supersampling para bordas suaves
 
-FUNDO_TOPO = (10, 58, 40)
-FUNDO_BASE = (6, 33, 23)
-MENTA = (95, 227, 161)
-APAGADA = (255, 255, 255, 60)
-LINHA = (255, 214, 120)
+FUNDO_TOPO = (29, 29, 29)
+FUNDO_BASE = (0, 0, 0)
+VERDE = (116, 211, 82)
+APAGADA = (255, 255, 255, 55)
+LINHA = (246, 182, 81)
 
 
 def gradiente(tam):
@@ -43,7 +44,7 @@ def desenho(tam, escala):
     for i, h in enumerate(alturas):
         bx = x0 + i * (larg + vao)
         topo = base - area * h
-        cor = MENTA if h <= corte else APAGADA
+        cor = VERDE if h <= corte else APAGADA
         d.rounded_rectangle([bx, topo, bx + larg, base], radius=r, fill=cor)
     # linha de corte tracejada
     yl = base - area * corte

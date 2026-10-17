@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 
 LINK = "https://vendas.moretta.com.br/metodo/"
 PASTA = Path(__file__).resolve().parent.parent / "app" / "icons"
-COR = (11, 58, 40)
+COR = (17, 17, 17)
 
 qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=14, border=3)
 qr.add_data(LINK)

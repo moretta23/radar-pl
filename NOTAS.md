@@ -67,7 +67,7 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 - Bancos aparecem com Dív/PL 0,00 (o Fundamentus não calcula para bancos).
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
-- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v15"` no
+- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v16"` no
   `app/sw.js` para os celulares pegarem a versão nova.
 - O histórico do git fica fora do Dropbox, em
   `C:\Users\NOTEBOOK\git-repos\metodo-tempo.git` (o Dropbox travava os
