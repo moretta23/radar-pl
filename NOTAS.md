@@ -46,10 +46,14 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
   GitHub (1ª execução: 16/10/2026 às 19h). Se falhar, alternativa: rodar
   `scripts/atualizar.py` no computador e dar `git push` (há uma tarefa agendada
   pausada no app do Claude, "Atualizar Radar P/L Fundamentus").
+- Nome no celular: quem instalou como "Radar P/L" só vê "Método Tempo" depois que
+  o Android atualizar o app (pode levar até 1 dia, às vezes pede confirmação) ou
+  removendo e instalando de novo. No iPhone o nome fica fixo: tem que remover e
+  adicionar de novo à Tela de Início.
 - Bancos aparecem com Dív/PL 0,00 (o Fundamentus não calcula para bancos).
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
-- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v13"` no
+- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v14"` no
   `sw.js` para os celulares pegarem a versão nova.
 - O histórico do git fica fora do Dropbox, em
   `C:\Users\NOTEBOOK\git-repos\metodo-tempo.git` (o Dropbox travava os
