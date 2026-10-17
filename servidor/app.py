@@ -4,21 +4,30 @@ Mais Tempo (PWA) no servidor da VPS, em https://vendas.moretta.com.br/metodo/
 - Serve as telas do app (static/) e o dados.json guardado em DADOS_DIR.
 - Roda scripts/atualizar.py (Fundamentus + Selic) todo dia útil às 19h (Brasília).
   Ao iniciar, se o dados.json for anterior ao último fechamento, atualiza na hora.
-- Aberto para qualquer pessoa (sem CPF).
+- Acesso por CPF (desde 17/10/2026): a MESMA lista do Simulador de FII (bot @LiberaFii_bot). Este servidor
+  não guarda CPFs: pergunta ao servidor do FII (/api/acesso/*), com a senha ACESSO_SEGREDO.
 
 Variáveis de ambiente:
-  DADOS_DIR   pasta gravável de dados.json e setores.json   padrão: /dados
-  HORA        horário da atualização (HH:MM, Brasília)      padrão: 19:00
-  PORTA       porta HTTP                                    padrão: 8000
+  DADOS_DIR       pasta gravável de dados.json e setores.json   padrão: /dados
+  HORA            horário da atualização (HH:MM, Brasília)      padrão: 19:00
+  PORTA           porta HTTP                                    padrão: 8000
+  EXIGIR_CPF      1 exige CPF liberado                          padrão: 1
+  ACESSO_URL      controle de acesso do FII                     padrão: http://fii-app:8000/api/acesso
+  ACESSO_SEGREDO  senha entre os servidores (a mesma do .env do fii-app)
 """
+import hashlib
+import json
 import logging
 import os
 import shutil
+import time
+import urllib.error
+import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from flask import Flask, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 
 BASE = Path(__file__).parent
 DADOS = Path(os.getenv("DADOS_DIR", "/dados"))
@@ -32,6 +41,64 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("metodo")
 logging.getLogger("apscheduler").setLevel(logging.WARNING)
 app = Flask(__name__, static_folder=None)
+
+EXIGIR_CPF = os.getenv("EXIGIR_CPF", "1") == "1"
+ACESSO_URL = os.getenv("ACESSO_URL", "http://fii-app:8000/api/acesso").rstrip("/")
+ACESSO_SEGREDO = os.getenv("ACESSO_SEGREDO", "").strip()
+APP_ACESSO = "metodo"  # nome deste app na lista de acesso
+_conferidos: dict = {}  # (hash da chave, aparelho) -> até quando vale a última conferência ok
+
+
+# ------------------------------------------------------------ acesso por CPF (lista do FII)
+
+def _servico(caminho: str, corpo: dict):
+    """Chama o controle de acesso do FII. Devolve (status, json); 503 se ele não responder."""
+    req = urllib.request.Request(f"{ACESSO_URL}/{caminho}", json.dumps({**corpo, "app": APP_ACESSO}).encode(),
+                                 {"Content-Type": "application/json", "X-Acesso-Segredo": ACESSO_SEGREDO})
+    try:
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return r.status, json.loads(r.read() or b"{}")
+    except urllib.error.HTTPError as e:
+        try:
+            return e.code, json.loads(e.read() or b"{}")
+        except ValueError:
+            return e.code, {"erro": "servico_acesso"}
+    except Exception as e:  # noqa: BLE001
+        log.warning("Controle de acesso fora do ar: %s", e)
+        return 503, {"erro": "servico_acesso"}
+
+
+def _sem_cache(resp, status=200):
+    resp.headers["Cache-Control"] = "no-store"
+    return resp, status
+
+
+def _erro_acesso():
+    """None se o CPF do celular está liberado; senão a resposta de erro."""
+    if not EXIGIR_CPF:
+        return None
+    chave = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+    aparelho = request.headers.get("X-Aparelho", "")
+    if not chave:
+        return _sem_cache(jsonify(erro="sem_chave"), 401)
+    k = (hashlib.sha256(chave.encode()).hexdigest(), aparelho)
+    if _conferidos.get(k, 0) > time.time():
+        return None
+    status, r = _servico("conferir", {"chave": chave, "aparelho": aparelho})
+    if status == 200 and r.get("ok"):
+        _conferidos[k] = time.time() + 60  # confere de novo no máximo a cada minuto
+        if len(_conferidos) > 2000:
+            _conferidos.clear()
+        return None
+    erro = r.get("erro") or "servico_acesso"
+    return _sem_cache(jsonify(erro=erro), 503 if erro == "servico_acesso" else 401 if erro == "sem_chave" else 403)
+
+
+@app.post("/api/entrar")
+def entrar():
+    corpo = request.get_json(silent=True) or {}
+    status, r = _servico("entrar", {"cpf": corpo.get("cpf"), "aparelho": corpo.get("aparelho")})
+    return _sem_cache(jsonify(r), status)
 
 
 def preparar():
@@ -76,10 +143,14 @@ def saude():
     return "ok"
 
 
-@app.get("/dados.json")
+@app.get("/api/dados")
+@app.get("/dados.json")  # endereço antigo: também exige CPF
 def dados():
+    erro = _erro_acesso()
+    if erro:
+        return erro
     resp = send_from_directory(DADOS, "dados.json")
-    resp.headers["Cache-Control"] = "no-cache"
+    resp.headers["Cache-Control"] = "no-store"
     return resp
 
 
@@ -99,6 +170,8 @@ def estaticos(arquivo):
 
 
 if __name__ == "__main__":
+    if EXIGIR_CPF and not ACESSO_SEGREDO:
+        log.warning("EXIGIR_CPF=1 sem ACESSO_SEGREDO: ninguém vai conseguir entrar")
     preparar()
     agendar()
     from waitress import serve

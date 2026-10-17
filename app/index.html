@@ -147,6 +147,24 @@ dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
 .btn.fantasma { background: var(--card2); color: var(--texto); border: 1px solid var(--linha); }
 .compartilhar .instalar { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); display: grid; gap: 6px; }
 .compartilhar .instalar b { color: var(--texto); }
+/* Tela de acesso por CPF (mesma lista do Simulador de FII): cobre o app até o acesso ser confirmado */
+.porta { position: fixed; inset: 0; z-index: 30; background: var(--fundo); display: grid; place-items: center; overflow-y: auto;
+  padding: calc(24px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+.porta-caixa { width: 100%; max-width: 380px; display: grid; gap: 14px; justify-items: center; text-align: center; }
+.porta-caixa img { width: 120px; height: 120px; border-radius: 28px; }
+.porta-marca { font: 400 26px/1.2 var(--marca); color: var(--laranja); }
+.porta-caixa h2 { margin: 6px 0 0; font-size: 22px; font-weight: 900; }
+.porta[data-estado="nao_liberado"] h2, .porta[data-estado="outro_aparelho"] h2, .porta[data-estado="bloqueado"] h2, .porta[data-estado="cpf_invalido"] h2 { color: var(--vermelho); }
+.porta-caixa p { margin: 0; color: var(--suave); font-weight: 600; font-size: 15px; line-height: 1.5; }
+.porta-caixa form { width: 100%; display: grid; gap: 8px; text-align: left; margin-top: 6px; }
+.porta-caixa label { font-size: 13px; font-weight: 700; color: var(--suave); }
+.porta-caixa input { width: 100%; background: var(--campo); color: var(--texto); border: 1.5px solid var(--linha); border-radius: 16px; padding: 14px 16px; font-weight: 900; font-size: 22px; letter-spacing: .04em; text-align: center; outline: none; }
+.porta-caixa input:focus { border-color: var(--laranja); }
+.porta-caixa .btn { width: 100%; flex: none; padding: 14px; font-size: 16px; margin-top: 4px; }
+.porta-caixa .btn.laranja { background: var(--laranja); }
+.porta-caixa .btn:disabled { opacity: .6; }
+.porta-caixa small { color: var(--suave); font-weight: 600; font-size: 12px; }
+.porta-caixa .recado { color: var(--laranja); font-weight: 800; font-size: 14px; min-height: 1em; }
 </style>
 </head>
 <body>
@@ -278,6 +296,23 @@ dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
   </div>
 </dialog>
 
+<div class="porta" id="porta" hidden>
+  <div class="porta-caixa" role="dialog" aria-modal="true" aria-labelledby="portaTitulo">
+    <img src="icons/logo.png" alt="Vamos Juntos · Vivendo Capital">
+    <div class="porta-marca">Mais Tempo</div>
+    <h2 id="portaTitulo">Acesso exclusivo</h2>
+    <p id="portaTexto"></p>
+    <form id="portaForm" autocomplete="off">
+      <label for="cpf">CPF</label>
+      <input id="cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14">
+      <button class="btn laranja" id="portaEntrar" type="submit">Entrar</button>
+    </form>
+    <button class="btn fantasma" id="portaDeNovo" type="button" hidden>Tentar de novo</button>
+    <p class="recado" id="portaRecado"></p>
+    <small>Acesso pessoal: o mesmo CPF liberado vale para todos os apps da Vivendo Capital, um celular por CPF.</small>
+  </div>
+</div>
+
 <script>
 const $ = id => document.getElementById(id);
 let acoes = [];
@@ -372,10 +407,84 @@ function render() {
   }).join("");
 }
 
-async function carregar() {
+/* ---------- acesso por CPF: mesma lista do Simulador de FII (um celular por CPF em cada app; até 3 dias sem internet) ---------- */
+// "aparelho" é o mesmo registro usado pelo FII (mesmo endereço); a chave é só deste app.
+const ler = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const TOLERANCIA = 3 * 24 * 3600 * 1000;
+let aparelho = ler("aparelho");
+if (!aparelho) {
+  aparelho = (crypto.randomUUID && crypto.randomUUID()) ||
+    Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
+  gravar("aparelho", aparelho);
+}
+const dentroDaTolerancia = () => Date.now() - (ler("mt-confirmadoEm") || 0) <= TOLERANCIA;
+const PORTA = {
+  entrar: ["Acesso exclusivo", "Digite seu CPF para liberar o app neste celular. Isso é pedido só uma vez."],
+  nao_liberado: ["CPF não liberado", "Este CPF ainda não tem acesso aos apps da Vivendo Capital. Fale com a Vivendo Capital para liberar."],
+  outro_aparelho: ["CPF em uso em outro celular", "Cada CPF vale para um celular. Para trocar de aparelho, peça a liberação à Vivendo Capital."],
+  bloqueado: ["Acesso encerrado", "O acesso deste CPF foi encerrado. Fale com a Vivendo Capital."],
+  offline: ["Conecte-se à internet", "Faz mais de 3 dias que o app não confirma seu acesso. Abra com internet para continuar."],
+  cpf_invalido: ["CPF inválido", "Confira os números do CPF e tente de novo."],
+};
+function mostrarPorta(estado, manterCampo) {
+  const [t, d] = PORTA[estado] || PORTA.entrar;
+  $("portaTitulo").textContent = t; $("portaTexto").textContent = d; $("portaRecado").textContent = "";
+  const pedeCpf = estado !== "offline" && estado !== "bloqueado";
+  $("portaForm").hidden = !pedeCpf; $("portaDeNovo").hidden = pedeCpf;
+  $("porta").dataset.estado = estado;
+  if (!manterCampo) $("cpf").value = "";
+  $("porta").hidden = false; document.body.style.overflow = "hidden";
+}
+function esconderPorta() { $("porta").hidden = true; document.body.style.overflow = ""; }
+function cpfValido(c) {
+  if (!/^\d{11}$/.test(c) || /^(\d)\1{10}$/.test(c)) return false;
+  for (const n of [9, 10]) {
+    let s = 0; for (let i = 0; i < n; i++) s += +c[i] * (n + 1 - i);
+    if ((s * 10 % 11) % 10 !== +c[n]) return false;
+  }
+  return true;
+}
+$("cpf").addEventListener("input", e => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+  e.target.value = d.replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d{1,2})$/, ".$1-$2");
+});
+$("portaForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const cpf = $("cpf").value.replace(/\D/g, "");
+  if (!cpfValido(cpf)) { mostrarPorta("cpf_invalido", true); return; }
+  const btn = $("portaEntrar"); btn.disabled = true; btn.textContent = "Conferindo…";
   try {
-    const resp = await fetch("dados.json", { cache: "no-cache" });
+    const r = await fetch("api/entrar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cpf, aparelho }) });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.chave) {
+      gravar("mt-chave", j.chave); gravar("mt-confirmadoEm", Date.now());
+      esconderPorta(); carregar();
+    } else if (j.erro === "servico_acesso") $("portaRecado").textContent = "Não consegui conferir agora. Tente de novo em instantes.";
+    else mostrarPorta(j.erro || "nao_liberado", j.erro === "cpf_invalido");
+  } catch (err) { $("portaRecado").textContent = "Sem conexão. Tente de novo com internet."; }
+  finally { btn.disabled = false; btn.textContent = "Entrar"; }
+});
+$("portaDeNovo").addEventListener("click", () => {
+  if ($("porta").dataset.estado === "bloqueado") { gravar("mt-chave", null); mostrarPorta("entrar"); } else carregar();
+});
+
+async function carregar() {
+  const chave = ler("mt-chave");
+  if (!chave) { mostrarPorta("entrar"); return; }
+  try {
+    const resp = await fetch("api/dados", { cache: "no-store", headers: { Authorization: "Bearer " + chave, "X-Aparelho": aparelho } });
+    if (resp.status === 401 || resp.status === 403) {
+      const j = await resp.json().catch(() => ({}));
+      if (j.erro === "sem_chave" || resp.status === 401) { gravar("mt-chave", null); mostrarPorta("entrar"); }
+      else mostrarPorta(j.erro || "bloqueado");
+      return;
+    }
     if (!resp.ok) throw new Error(resp.status);
+    // a resposta pode vir do celular (sem internet): só conta como conferida se veio do servidor agora
+    if (!resp.headers.get("X-Do-Celular")) gravar("mt-confirmadoEm", Date.now());
+    else if (!dentroDaTolerancia()) { mostrarPorta("offline"); return; }
+    esconderPorta();
     const dados = await resp.json();
     acoes = dados.acoes || [];
     // Opções de setor vêm dos próprios dados; reaplica a escolha guardada.
@@ -390,6 +499,7 @@ async function carregar() {
     }
     render();
   } catch (e) {
+    if (!dentroDaTolerancia()) { mostrarPorta("offline"); return; }
     $("aviso").textContent = "Não foi possível carregar os dados. Verifique a internet e abra o app de novo.";
   }
 }
@@ -453,6 +563,7 @@ $("instalarFechar").addEventListener("click", () => {
 addEventListener("appinstalled", () => { $("instalar").hidden = true; });
 
 render();
+if (!ler("mt-chave")) mostrarPorta("entrar"); // sem acesso ainda: a tela de CPF aparece de cara
 carregar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>

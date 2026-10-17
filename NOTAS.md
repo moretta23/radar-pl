@@ -12,6 +12,13 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 - VPS 178.104.158.79, usuário `moretta`, chave `~/.ssh/id_vps_claude`. Container
   `metodo-app` em `~/apps/metodo-app` (docker compose + Caddy, rota `/metodo/`),
   no mesmo esquema do Simulador de FII.
+- **Acesso por CPF (17/10/2026):** a MESMA lista do Simulador de FII e do Banco Data, administrada pelo
+  **@LiberaFii_bot** (liberar/bloquear/trocar celular valem para todos os apps). O app pede o CPF uma vez;
+  um celular por CPF; até 3 dias sem internet. Os dados saem por `api/dados` (e `dados.json`), que exigem a
+  chave; o servidor pergunta ao `fii-app` (`ACESSO_URL`) com a senha `ACESSO_SEGREDO` de
+  `~/apps/metodo-app/.env` (a mesma do `.env` do fii-app; só na VPS, nunca no Dropbox nem no git).
+  Versão sem CPF guardada em `../radar-pl-antes-cpf/`. Testar no PC: configuração `metodo-app-pwa`
+  do `.claude/launch.json` (junto com `fii-app-pwa`), depois de `sh servidor/montar.sh` na pasta dela.
 - `servidor/app.py` serve as telas e o `dados.json` da pasta `~/apps/metodo-app/dados`,
   e roda `scripts/atualizar.py` de segunda a sexta às 19h (Brasília). Se o
   Fundamentus falhar, mantém os dados anteriores. Ver erros:
@@ -74,7 +81,7 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 - Bancos aparecem com Dív/PL 0,00 (o Fundamentus não calcula para bancos).
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
-- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v18"` no
+- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v19"` no
   `app/sw.js` para os celulares pegarem a versão nova.
 - O histórico do git fica fora do Dropbox, em
   `C:\Users\NOTEBOOK\git-repos\metodo-tempo.git` (o Dropbox travava os
