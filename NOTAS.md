@@ -1,7 +1,9 @@
 # Método Tempo: notas do projeto (para melhorias futuras)
 
 Criado em 15/10/2026 como "Radar P/L"; renomeado para "Método Tempo" em 16/10/2026. App no ar: **https://vendas.moretta.com.br/metodo/** (VPS, desde 17/10/2026).
-Endereço antigo (GitHub Pages, ainda ativo): https://moretta23.github.io/radar-pl/
+Endereço antigo https://moretta23.github.io/radar-pl/ agora só mostra o aviso
+"o Método Tempo mudou de endereço" (`index.html` e `sw.js` da raiz, que também
+apagam o app antigo guardado nos celulares). As telas do app ficam em `app/`.
 Repositório: https://github.com/moretta23/radar-pl
 Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conversa\`.
 
@@ -20,14 +22,13 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
   `docker compose up -d --build metodo-app`. Aumentar o `CACHE` do `sw.js`.
 - QR code: `python scripts/gerar_qrcode.py` (endereço da VPS).
 
-## Como funciona (versão do GitHub)
+## Como funcionava no GitHub (desligado em 17/10/2026)
 
 - O site do Fundamentus não permite que um app no celular leia os dados direto
   (bloqueio de CORS). Por isso os dados são baixados no servidor do GitHub e
   gravados em `dados.json`, que o app lê.
-- `.github/workflows/atualizar.yml` roda `scripts/atualizar.py` de segunda a
-  sexta às 22h UTC (19h de Brasília) e faz commit de `dados.json` e `setores.json`.
-  Para rodar na hora: aba **Actions** → *Atualizar dados* → **Run workflow**.
+- `.github/workflows/atualizar.yml` rodava `scripts/atualizar.py` nos dias úteis
+  às 19h; o agendamento foi tirado (só roda à mão, em **Actions**).
 - O script busca: a tabela `resultado.php` do Fundamentus; a Selic meta no
   Banco Central (série SGS 432); e o setor de cada papel (`resultado.php?setor=N`
   para os 43 setores), guardado em `setores.json` e rebuscado só 1x por semana.
@@ -67,13 +68,14 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
 - Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v15"` no
-  `sw.js` para os celulares pegarem a versão nova.
+  `app/sw.js` para os celulares pegarem a versão nova.
 - O histórico do git fica fora do Dropbox, em
   `C:\Users\NOTEBOOK\git-repos\metodo-tempo.git` (o Dropbox travava os
   arquivos internos do git). A pasta `git-antigo-radar` é uma cópia velha e
   pode ser apagada.
-- Para testar antes de publicar: na pasta do app, `python -m http.server 8766`
-  e abrir `http://localhost:8766` (ou `http://192.168.15.3:8766` no celular).
+- Para testar antes de publicar: `sh servidor/montar.sh PASTA`, depois, dentro
+  de PASTA, `DADOS_DIR=PASTA/dados PORTA=8766 python app.py` e abrir
+  `http://localhost:8766` (ou `http://192.168.15.3:8766` no celular).
 
 ## Ideias de melhoria
 

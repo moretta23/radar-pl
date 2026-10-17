@@ -6,7 +6,7 @@ Uso:  python scripts/gerar_icones.py
 from pathlib import Path
 from PIL import Image, ImageDraw
 
-SAIDA = Path(__file__).resolve().parent.parent / "icons"
+SAIDA = Path(__file__).resolve().parent.parent / "app" / "icons"
 S = 4  # supersampling para bordas suaves
 
 FUNDO_TOPO = (10, 58, 40)

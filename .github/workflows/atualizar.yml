@@ -1,8 +1,8 @@
 name: Atualizar dados
 
+# Desligado em 17/10/2026: os dados agora são baixados pela VPS (vendas.moretta.com.br/metodo/).
+# Ainda dá para rodar à mão em Actions → Atualizar dados → Run workflow.
 on:
-  schedule:
-    - cron: "0 22 * * 1-5"   # 19h em Brasília, dias úteis
   workflow_dispatch:
 
 permissions:
