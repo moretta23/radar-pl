@@ -4,14 +4,14 @@ Mais Tempo (PWA) no servidor da VPS, em https://vendas.moretta.com.br/metodo/
 - Serve as telas do app (static/) e o dados.json guardado em DADOS_DIR.
 - Roda scripts/atualizar.py (Fundamentus + Selic) todo dia útil às 19h (Brasília).
   Ao iniciar, se o dados.json for anterior ao último fechamento, atualiza na hora.
-- Acesso por CPF (desde 17/10/2026): a MESMA lista do Simulador de FII (bot @LiberaFii_bot). Este servidor
-  não guarda CPFs: pergunta ao servidor do FII (/api/acesso/*), com a senha ACESSO_SEGREDO.
+- Acesso por telefone (desde 17/10/2026; antes era CPF): a MESMA lista do Simulador de FII (bot @LiberaFii_bot). Este servidor
+  não guarda telefones: pergunta ao servidor do FII (/api/acesso/*), com a senha ACESSO_SEGREDO.
 
 Variáveis de ambiente:
   DADOS_DIR       pasta gravável de dados.json e setores.json   padrão: /dados
   HORA            horário da atualização (HH:MM, Brasília)      padrão: 19:00
   PORTA           porta HTTP                                    padrão: 8000
-  EXIGIR_CPF      1 exige CPF liberado                          padrão: 1
+  EXIGIR_CPF      1 exige telefone liberado                          padrão: 1
   ACESSO_URL      controle de acesso do FII                     padrão: http://fii-app:8000/api/acesso
   ACESSO_SEGREDO  senha entre os servidores (a mesma do .env do fii-app)
 """
@@ -49,7 +49,7 @@ APP_ACESSO = "metodo"  # nome deste app na lista de acesso
 _conferidos: dict = {}  # (hash da chave, aparelho) -> até quando vale a última conferência ok
 
 
-# ------------------------------------------------------------ acesso por CPF (lista do FII)
+# ------------------------------------------------------------ acesso por telefone (lista do FII)
 
 def _servico(caminho: str, corpo: dict):
     """Chama o controle de acesso do FII. Devolve (status, json); 503 se ele não responder."""
@@ -74,7 +74,7 @@ def _sem_cache(resp, status=200):
 
 
 def _erro_acesso():
-    """None se o CPF do celular está liberado; senão a resposta de erro."""
+    """None se o telefone do celular está liberado; senão a resposta de erro."""
     if not EXIGIR_CPF:
         return None
     chave = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
@@ -97,7 +97,7 @@ def _erro_acesso():
 @app.post("/api/entrar")
 def entrar():
     corpo = request.get_json(silent=True) or {}
-    status, r = _servico("entrar", {"cpf": corpo.get("cpf"), "aparelho": corpo.get("aparelho")})
+    status, r = _servico("entrar", {"telefone": corpo.get("telefone"), "aparelho": corpo.get("aparelho")})
     return _sem_cache(jsonify(r), status)
 
 
@@ -144,7 +144,7 @@ def saude():
 
 
 @app.get("/api/dados")
-@app.get("/dados.json")  # endereço antigo: também exige CPF
+@app.get("/dados.json")  # endereço antigo: também exige telefone liberado
 def dados():
     erro = _erro_acesso()
     if erro:

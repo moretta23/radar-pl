@@ -1,6 +1,6 @@
 // Guarda o app para abrir sem internet; os dados vêm da rede quando possível.
-// Os dados (api/dados) exigem CPF liberado: só são guardados depois de uma resposta boa do servidor.
-const CACHE = "radar-pl-v19";
+// Os dados (api/dados) exigem telefone liberado: só são guardados depois de uma resposta boa do servidor.
+const CACHE = "radar-pl-v20";
 const ARQUIVOS = ["./", "index.html", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/favicon.png", "icons/qrcode.png",
   "icons/logo.png"];
