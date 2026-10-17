@@ -38,6 +38,10 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 
 ## O que o app tem (16/10/2026)
 
+- Visual (17/10/2026): mesma cara do Simulador de FII, tema escuro com a paleta
+  Vamos Juntos · Vivendo Capital (preto, laranja #F6B651, verde #74D352), fontes
+  Nunito + Permanent Marker. Ícone: barras verdes, linha de corte laranja, fundo preto.
+
 - Topo: ícone + "Método Tempo", contagem de empresas e botão de QR code
   (janela com QR, "Enviar link" e instruções de instalação Android/iPhone).
 - Quadro amarelo "P/L do Tesouro hoje" = 100 ÷ Selic meta, com a Selic ao lado.
