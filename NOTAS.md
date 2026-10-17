@@ -1,8 +1,8 @@
-# Método Tempo: notas do projeto (para melhorias futuras)
+# Mais Tempo: notas do projeto (para melhorias futuras)
 
-Criado em 15/10/2026 como "Radar P/L"; renomeado para "Método Tempo" em 16/10/2026. App no ar: **https://vendas.moretta.com.br/metodo/** (VPS, desde 17/10/2026).
+Criado em 15/10/2026 como "Radar P/L"; renomeado para "Método Tempo" em 16/10/2026 e para "Mais Tempo" em 17/10/2026. App no ar: **https://vendas.moretta.com.br/metodo/** (VPS, desde 17/10/2026).
 Endereço antigo https://moretta23.github.io/radar-pl/ agora só mostra o aviso
-"o Método Tempo mudou de endereço" (`index.html` e `sw.js` da raiz, que também
+"o app agora é Mais Tempo e mudou de endereço" (`index.html` e `sw.js` da raiz, que também
 apagam o app antigo guardado nos celulares). As telas do app ficam em `app/`.
 Repositório: https://github.com/moretta23/radar-pl
 Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conversa\`.
@@ -42,7 +42,7 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
   Vamos Juntos · Vivendo Capital (preto, laranja #F6B651, verde #74D352), fontes
   Nunito + Permanent Marker. Ícone: barras verdes, linha de corte laranja, fundo preto.
 
-- Topo: ícone + "Método Tempo", contagem de empresas e botão de QR code
+- Topo: ícone + "Mais Tempo", contagem de empresas e botão de QR code
   (janela com QR, "Enviar link" e instruções de instalação Android/iPhone).
 - Quadro amarelo "P/L do Tesouro hoje" = 100 ÷ Selic meta, com a Selic ao lado.
 - Busca por ticker ou nome.
@@ -64,14 +64,14 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
   `User-Agent: Mozilla/5.0` + `Accept: */*` e pausas de 3 s entre setores.
   Se a página principal vier vazia, o script para sem apagar o `dados.json`.
 - O Fundamentus aceitou o acesso do GitHub (16/10/2026) e da VPS (17/10/2026).
-- Nome no celular: quem instalou como "Radar P/L" só vê "Método Tempo" depois que
+- Nome no celular: quem instalou com nome antigo ("Radar P/L", "Método Tempo") só vê "Mais Tempo" depois que
   o Android atualizar o app (pode levar até 1 dia, às vezes pede confirmação) ou
   removendo e instalando de novo. No iPhone o nome fica fixo: tem que remover e
   adicionar de novo à Tela de Início.
 - Bancos aparecem com Dív/PL 0,00 (o Fundamentus não calcula para bancos).
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
-- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v16"` no
+- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v17"` no
   `app/sw.js` para os celulares pegarem a versão nova.
 - O histórico do git fica fora do Dropbox, em
   `C:\Users\NOTEBOOK\git-repos\metodo-tempo.git` (o Dropbox travava os

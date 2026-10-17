@@ -1,4 +1,4 @@
-# Método Tempo
+# Mais Tempo
 
 App de celular (PWA) que lista as ações da B3 com P/L baixo, com dados de
 [fundamentus.com.br](https://www.fundamentus.com.br/resultado.php).

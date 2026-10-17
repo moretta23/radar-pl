@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Método Tempo</title>
-<meta name="application-name" content="Método Tempo">
-<meta name="apple-mobile-web-app-title" content="Método Tempo">
+<title>Mais Tempo</title>
+<meta name="application-name" content="Mais Tempo">
+<meta name="apple-mobile-web-app-title" content="Mais Tempo">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="Ações da B3 com P/L baixo, com dados do Fundamentus. Vamos Juntos · Vivendo Capital.">
@@ -151,7 +151,7 @@ dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
     <div class="marca">
       <img src="icons/icon-192.png" alt="">
       <div>
-        <h1>Método Tempo</h1>
+        <h1>Mais Tempo</h1>
         <div class="assinatura">VAMOS JUNTOS · VIVENDO CAPITAL</div>
       </div>
       <button id="abrirQr" class="icone-btn" type="button" aria-label="Compartilhar o app (QR code)">
@@ -253,9 +253,9 @@ dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
 </div>
 
 <dialog id="dlgQr" class="compartilhar" aria-labelledby="qrTitulo">
-  <h2 id="qrTitulo">Compartilhar o Método Tempo</h2>
+  <h2 id="qrTitulo">Compartilhar o Mais Tempo</h2>
   <p>Peça para apontarem a câmera do celular para o código.</p>
-  <img class="qr" src="icons/qrcode.png" alt="QR code do app Método Tempo" width="600" height="600">
+  <img class="qr" src="icons/qrcode.png" alt="QR code do app Mais Tempo" width="600" height="600">
   <div class="link" id="qrLink">https://vendas.moretta.com.br/metodo/</div>
   <div class="acoes">
     <button id="qrEnviar" class="btn" type="button">Enviar link</button>
@@ -393,7 +393,7 @@ $("dlgQr").addEventListener("click", e => { if (e.target === $("dlgQr")) $("dlgQ
 $("qrEnviar").addEventListener("click", async () => {
   const b = $("qrEnviar");
   if (navigator.share) {
-    try { await navigator.share({ title: "Método Tempo", text: "Instale o app Método Tempo:", url: LINK_APP }); } catch (e) {}
+    try { await navigator.share({ title: "Mais Tempo", text: "Instale o app Mais Tempo:", url: LINK_APP }); } catch (e) {}
     return;
   }
   try { await navigator.clipboard.writeText(LINK_APP); b.textContent = "Link copiado"; }

@@ -1,4 +1,4 @@
-"""Desenha o ícone do Método Tempo: barras de P/L com uma linha de corte;
+"""Desenha o ícone do Mais Tempo: barras de P/L com uma linha de corte;
 as barras abaixo da linha (as baratas) ficam em verde. Paleta da Vamos Juntos ·
 Vivendo Capital: preto, laranja #F6B651 e verde #74D352.
 

@@ -1,5 +1,5 @@
 """
-Método Tempo (PWA) no servidor da VPS, em https://vendas.moretta.com.br/metodo/
+Mais Tempo (PWA) no servidor da VPS, em https://vendas.moretta.com.br/metodo/
 
 - Serve as telas do app (static/) e o dados.json guardado em DADOS_DIR.
 - Roda scripts/atualizar.py (Fundamentus + Selic) todo dia útil às 19h (Brasília).
