@@ -13,8 +13,8 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
   `metodo-app` em `~/apps/metodo-app` (docker compose + Caddy, rota `/metodo/`),
   no mesmo esquema do Simulador de FII.
 - **Acesso por telefone (17/10/2026; antes era CPF, trocado por causa da LGPD):** a MESMA lista do Simulador de FII e do Banco Data, administrada pelo
-  **@LiberaFii_bot** (liberar/bloquear/trocar celular valem para todos os apps). O app pede o telefone
-  (00) 00000-0000 uma vez; um celular por telefone; até 3 dias sem internet. Os dados saem por `api/dados` (e `dados.json`), que exigem a
+  **@LiberaFii_bot** (liberar/bloquear/trocar celular valem para todos os apps). O app pede nome, e-mail e telefone
+  (país + DDI; Brasil (00) 00000-0000), que viram lead no FII, uma vez; um celular por telefone; até 3 dias sem internet. Os dados saem por `api/dados` (e `dados.json`), que exigem a
   chave; o servidor pergunta ao `fii-app` (`ACESSO_URL`) com a senha `ACESSO_SEGREDO` de
   `~/apps/metodo-app/.env` (a mesma do `.env` do fii-app; só na VPS, nunca no Dropbox nem no git).
   Versão sem trava guardada em `../radar-pl-antes-cpf/`. Testar no PC: configuração `metodo-app-pwa`

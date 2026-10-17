@@ -97,7 +97,7 @@ def _erro_acesso():
 @app.post("/api/entrar")
 def entrar():
     corpo = request.get_json(silent=True) or {}
-    status, r = _servico("entrar", {"telefone": corpo.get("telefone"), "aparelho": corpo.get("aparelho")})
+    status, r = _servico("entrar", {k: corpo.get(k) for k in ("telefone", "aparelho", "nome", "email", "aceite")})
     return _sem_cache(jsonify(r), status)
 
 
