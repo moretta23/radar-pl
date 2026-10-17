@@ -1,10 +1,26 @@
 # Método Tempo: notas do projeto (para melhorias futuras)
 
-Criado em 15/10/2026 como "Radar P/L"; renomeado para "Método Tempo" em 16/10/2026. App no ar: https://moretta23.github.io/radar-pl/
+Criado em 15/10/2026 como "Radar P/L"; renomeado para "Método Tempo" em 16/10/2026. App no ar: **https://vendas.moretta.com.br/metodo/** (VPS, desde 17/10/2026).
+Endereço antigo (GitHub Pages, ainda ativo): https://moretta23.github.io/radar-pl/
 Repositório: https://github.com/moretta23/radar-pl
 Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conversa\`.
 
-## Como funciona
+## Na VPS (endereço principal, desde 17/10/2026)
+
+- VPS 178.104.158.79, usuário `moretta`, chave `~/.ssh/id_vps_claude`. Container
+  `metodo-app` em `~/apps/metodo-app` (docker compose + Caddy, rota `/metodo/`),
+  no mesmo esquema do Simulador de FII.
+- `servidor/app.py` serve as telas e o `dados.json` da pasta `~/apps/metodo-app/dados`,
+  e roda `scripts/atualizar.py` de segunda a sexta às 19h (Brasília). Se o
+  Fundamentus falhar, mantém os dados anteriores. Ver erros:
+  `cd ~/apps && docker compose logs --tail 50 metodo-app`.
+- Atualizar na hora: `docker compose exec -T metodo-app python atualizar.py`.
+- Publicar mudanças do app: `sh servidor/montar.sh PASTA` monta a pasta, enviar
+  para `~/apps/metodo-app` (sem apagar `dados/`) e
+  `docker compose up -d --build metodo-app`. Aumentar o `CACHE` do `sw.js`.
+- QR code: `python scripts/gerar_qrcode.py` (endereço da VPS).
+
+## Como funciona (versão do GitHub)
 
 - O site do Fundamentus não permite que um app no celular leia os dados direto
   (bloqueio de CORS). Por isso os dados são baixados no servidor do GitHub e
@@ -42,10 +58,7 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
   e devolve páginas vazias para User-Agent de Chrome completo: o script usa
   `User-Agent: Mozilla/5.0` + `Accept: */*` e pausas de 3 s entre setores.
   Se a página principal vier vazia, o script para sem apagar o `dados.json`.
-- Ainda não confirmado se o Fundamentus aceita acesso vindo dos servidores do
-  GitHub (1ª execução: 16/10/2026 às 19h). Se falhar, alternativa: rodar
-  `scripts/atualizar.py` no computador e dar `git push` (há uma tarefa agendada
-  pausada no app do Claude, "Atualizar Radar P/L Fundamentus").
+- O Fundamentus aceitou o acesso do GitHub (16/10/2026) e da VPS (17/10/2026).
 - Nome no celular: quem instalou como "Radar P/L" só vê "Método Tempo" depois que
   o Android atualizar o app (pode levar até 1 dia, às vezes pede confirmação) ou
   removendo e instalando de novo. No iPhone o nome fica fixo: tem que remover e
@@ -53,7 +66,7 @@ Conversa completa que criou o app: `D:\Dropbox\CLAUDE\App de Metodo Tempo\conver
 - Bancos aparecem com Dív/PL 0,00 (o Fundamentus não calcula para bancos).
 - Workflows agendados do GitHub são desativados após 60 dias sem atividade
   no repositório; os commits diários mantêm ativo.
-- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v14"` no
+- Ao mudar arquivos do app, aumente o número em `CACHE = "radar-pl-v15"` no
   `sw.js` para os celulares pegarem a versão nova.
 - O histórico do git fica fora do Dropbox, em
   `C:\Users\NOTEBOOK\git-repos\metodo-tempo.git` (o Dropbox travava os

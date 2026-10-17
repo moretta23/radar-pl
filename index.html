@@ -216,7 +216,7 @@ footer a { color: var(--accent); }
   <h2 id="qrTitulo">Compartilhar o Método Tempo</h2>
   <p>Peça para apontarem a câmera do celular para o código.</p>
   <img class="qr" src="icons/qrcode.png" alt="QR code do app Método Tempo" width="602" height="602">
-  <div class="link" id="qrLink">https://moretta23.github.io/radar-pl/</div>
+  <div class="link" id="qrLink">https://vendas.moretta.com.br/metodo/</div>
   <div class="acoes">
     <button id="qrEnviar" class="prim" type="button">Enviar link</button>
     <button id="qrFechar" class="sec" type="button">Fechar</button>
@@ -346,7 +346,7 @@ async function carregar() {
 ctrl.forEach(k => $(k).addEventListener("input", render));
 
 // Janela de compartilhar: QR code + enviar link (WhatsApp etc.) ou copiar.
-const LINK_APP = "https://moretta23.github.io/radar-pl/";
+const LINK_APP = "https://vendas.moretta.com.br/metodo/";
 $("abrirQr").addEventListener("click", () => $("dlgQr").showModal());
 $("qrFechar").addEventListener("click", () => $("dlgQr").close());
 $("dlgQr").addEventListener("click", e => { if (e.target === $("dlgQr")) $("dlgQr").close(); });

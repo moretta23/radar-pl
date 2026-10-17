@@ -2,8 +2,10 @@
 e a Selic meta do Banco Central, e grava dados.json.
 
 Uso:  python scripts/atualizar.py
+      (DADOS_DIR=/pasta grava dados.json e setores.json nessa pasta; padrão: pasta do app)
 """
 import json
+import os
 import re
 import ssl
 import time
@@ -14,8 +16,9 @@ from pathlib import Path
 
 URL = "https://fundamentus.com.br/resultado.php"
 URL_SETORES = "https://fundamentus.com.br/buscaavancada.php"
-SAIDA = Path(__file__).resolve().parent.parent / "dados.json"
-SETORES = Path(__file__).resolve().parent.parent / "setores.json"
+PASTA = Path(os.getenv("DADOS_DIR") or Path(__file__).resolve().parent.parent)
+SAIDA = PASTA / "dados.json"
+SETORES = PASTA / "setores.json"
 BRASILIA = timezone(timedelta(hours=-3))
 # Série 432 do SGS/Banco Central: meta da taxa Selic (% ao ano)
 URL_SELIC = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json"
@@ -130,7 +133,9 @@ def main():
             a["s"] = setor[a["t"]]
     dados = {"atualizado": datetime.now(BRASILIA).strftime("%d/%m/%Y %H:%M"),
              "tesouro": selic(), "acoes": acoes}
-    SAIDA.write_text(json.dumps(dados, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp = SAIDA.with_suffix(".tmp")  # troca de uma vez: o servidor nunca entrega o arquivo pela metade
+    tmp.write_text(json.dumps(dados, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp.replace(SAIDA)
     n = sum(1 for a in acoes if a["pl"] is not None and 0 < a["pl"] <= 7)
     print(f"{len(acoes)} papéis lidos, {n} com 0 < P/L <= 7 -> {SAIDA.name}")
 
