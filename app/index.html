@@ -73,6 +73,12 @@ button { cursor: pointer; }
 .num.laranja .rot, .num.laranja .val { color: var(--laranja); }
 
 .corpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 18px max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
+/* Instalar */
+.instalar { display: flex; gap: 12px; align-items: center; background: var(--verde-fundo); border: 1px solid rgba(116,211,82,.35); border-radius: 20px; padding: 12px 14px; }
+.instalar p { margin: 0; font-size: 13px; font-weight: 700; flex: 1; }
+.instalar p small { display: block; font-weight: 600; color: var(--suave); margin-top: 2px; }
+.instalar .btn { flex: none; }
+.x { background: none; border: 0; color: var(--suave); font-size: 18px; padding: 4px 6px; }
 .busca { width: 100%; background: var(--card); border: 1.5px solid var(--linha); border-radius: 16px; padding: 12px 16px; font-weight: 700; font-size: 16px; outline: none; }
 .busca:focus { border-color: var(--laranja); }
 .busca::placeholder { color: var(--suave); }
@@ -175,6 +181,11 @@ dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
   </header>
 
   <main class="corpo">
+    <div class="instalar" id="instalar" hidden>
+      <p>Instale o Mais Tempo na tela inicial<small id="instalarDica"></small></p>
+      <button class="btn" id="instalarBtn" type="button">Instalar</button>
+      <button class="x" id="instalarFechar" type="button" aria-label="Fechar aviso">✕</button>
+    </div>
     <input id="busca" class="busca" type="search" placeholder="Buscar ticker ou empresa" aria-label="Buscar ticker ou empresa">
 
     <section class="card" aria-label="Filtros">
@@ -407,6 +418,40 @@ $("pvpMin").addEventListener("input", () => {
 $("pvpMax").addEventListener("input", () => {
   if (+$("pvpMax").value < +$("pvpMin").value) { $("pvpMin").value = $("pvpMax").value; render(); }
 }, true);
+// Aviso "Instalar": o Chrome nem sempre mostra o próprio convite (por exemplo logo depois de
+// desinstalar o app, ou quando o QR abre a página no navegador da câmera). No Android usa o
+// pedido de instalação do Chrome; sem ele, e no iPhone, mostra o caminho pelo menu.
+const modoApp = ["standalone", "fullscreen", "minimal-ui"].some(m => matchMedia(`(display-mode: ${m})`).matches)
+  || navigator.standalone === true || document.referrer.startsWith("android-app://");
+const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const celular = ios || /android/i.test(navigator.userAgent);
+let pedido = null;
+let semInstalar = false;
+try { semInstalar = localStorage.getItem("mais-tempo-sem-instalar") === "1"; } catch (e) {}
+function mostrarInstalar(dica, comBotao) {
+  if (modoApp || semInstalar) return;
+  $("instalarDica").textContent = dica;
+  $("instalarBtn").hidden = !comBotao;
+  $("instalar").hidden = false;
+}
+addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); pedido = e;
+  mostrarInstalar("Abre como app, sem loja", true);
+});
+if (ios) mostrarInstalar("No Safari: Compartilhar → Adicionar à Tela de Início", false);
+else if (celular) setTimeout(() => { if (!pedido) mostrarInstalar("Abra no Chrome: menu ⋮ → Instalar app (ou Adicionar à tela inicial)", false); }, 3000);
+$("instalarBtn").addEventListener("click", async () => {
+  if (!pedido) return;
+  pedido.prompt();
+  await pedido.userChoice;
+  pedido = null; $("instalar").hidden = true;
+});
+$("instalarFechar").addEventListener("click", () => {
+  $("instalar").hidden = true;
+  try { localStorage.setItem("mais-tempo-sem-instalar", "1"); } catch (e) {}
+});
+addEventListener("appinstalled", () => { $("instalar").hidden = true; });
+
 render();
 carregar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
