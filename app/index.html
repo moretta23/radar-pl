@@ -323,7 +323,7 @@ dialog.compartilhar::backdrop { background: rgba(0,0,0,.7); }
         <select id="pais" class="pais" aria-label="País (código DDI)"></select>
         <input id="telefone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(00) 00000-0000" maxlength="18">
       </div>
-      <label class="aceite"><input type="checkbox" id="aceite" checked> <span>Aceito receber contato da Vivendo Capital por e-mail e WhatsApp (LGPD). Posso cancelar quando quiser.</span></label>
+      <label class="aceite"><input type="checkbox" id="aceite"> <span>Aceito receber contato da Vivendo Capital por e-mail e WhatsApp (LGPD). Posso cancelar quando quiser.</span></label>
       <button class="btn laranja" id="portaEntrar" type="submit">Entrar</button>
     </form>
     <button class="btn fantasma" id="portaDeNovo" type="button" hidden>Tentar de novo</button>
@@ -495,6 +495,34 @@ function dadosLead() {
   if (!campoLead("aceite").checked) return { erro: "sem_aceite" };
   return { dados: { nome, email, telefone: "+" + ddi + num, aceite: true } };
 }
+
+// Cadastro único: os apps ficam no mesmo endereço, então o cadastro feito em um vale para os outros, que entram
+// sozinhos (Android e computador; no iPhone cada app instalado guarda os dados à parte e pede uma vez em cada um).
+const CADASTRO = "vj-cadastro";
+const lerCadastro = () => { try { return JSON.parse(localStorage.getItem(CADASTRO)); } catch (e) { return null; } };
+const salvarCadastro = (d) => { try { localStorage.setItem(CADASTRO, JSON.stringify(d)); } catch (e) {} };
+async function entrarComCadastro() {
+  const c = lerCadastro();
+  if (!c) return null;
+  try {
+    const r = await fetch("api/entrar", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...c, aparelho }) });
+    const j = await r.json().catch(() => ({}));
+    return r.ok && j.chave ? j : null;
+  } catch (e) { return null; }
+}
+function preencherCadastro() {
+  const c = lerCadastro();
+  if (!c) return;
+  if (!campoLead("nome").value) campoLead("nome").value = c.nome || "";
+  if (!campoLead("email").value) campoLead("email").value = c.email || "";
+  const tel = String(c.telefone || "").replace(/\D/g, "");
+  const ddi = PAISES.map((p) => p[2]).filter((d) => tel.startsWith(d)).sort((a, b) => b.length - a.length)[0];
+  if (ddi && !campoLead("telefone").value) {
+    campoLead("pais").value = ddi; campoLead("telefone").value = tel.slice(ddi.length); mascaraTelefone(campoLead("telefone"));
+  }
+  campoLead("aceite").checked = !!c.aceite;
+}
 $("telefone").addEventListener("input", (e) => mascaraTelefone(e.target));
 $("portaForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -505,6 +533,7 @@ $("portaForm").addEventListener("submit", async e => {
     const r = await fetch("api/entrar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...lead.dados, aparelho }) });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.chave) {
+      salvarCadastro(lead.dados);
       gravar("mt-chave", j.chave); gravar("mt-confirmadoEm", Date.now());
       esconderPorta(); carregar();
     } else if (j.erro === "servico_acesso") $("portaRecado").textContent = "Não consegui conferir agora. Tente de novo em instantes.";
@@ -518,7 +547,11 @@ $("portaDeNovo").addEventListener("click", () => {
 
 async function carregar() {
   const chave = ler("mt-chave");
-  if (!chave) { mostrarPorta("entrar"); return; }
+  if (!chave) {
+    const j = await entrarComCadastro();
+    if (j) { gravar("mt-chave", j.chave); gravar("mt-confirmadoEm", Date.now()); return carregar(); }
+    mostrarPorta("entrar"); preencherCadastro(); return;
+  }
   try {
     const resp = await fetch("api/dados", { cache: "no-store", headers: { Authorization: "Bearer " + chave, "X-Aparelho": aparelho } });
     if (resp.status === 401 || resp.status === 403) {
@@ -610,7 +643,7 @@ $("instalarFechar").addEventListener("click", () => {
 addEventListener("appinstalled", () => { $("instalar").hidden = true; });
 
 render();
-if (!ler("mt-chave")) mostrarPorta("entrar"); // sem acesso ainda: a tela de telefone aparece de cara
+if (!ler("mt-chave") && !lerCadastro()) mostrarPorta("entrar"); // sem acesso ainda: a tela de telefone aparece de cara
 carregar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
